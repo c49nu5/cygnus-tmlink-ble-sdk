@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Cygnus.BLE.VirtualGauge.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Cygnus.BLE.VirtualGauge.Views"
+    Shell.FlyoutBehavior="Disabled">
+
+    <ShellContent Title="TM Link Simulator"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+            
+</Shell>

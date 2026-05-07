@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:sample="clr-namespace:Cygnus.BLE.VirtualGauge.ViewModels"
+             xmlns:const="clr-namespace:Cygnus.BLE.Protobuf;assembly=Cygnus.BLE.Protobuf"
+             x:Class="Cygnus.BLE.VirtualGauge.Views.MainPage"
+             x:DataType="sample:MainViewModel"
+             Title="TM Link Service">
+
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout Margin="0,0,0,70" Spacing="12" Padding="12">
+
+                <!-- Service -->
+                <StackLayout>
+                    <Label Text="Service" FontAttributes="Bold" />
+                    <Label Text="{x:Static const:Constants.TMLinkServiceId}" TextColor="Green" />
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto">
+                        <Label Text="Local Name" VerticalOptions="Center" />
+                        <Entry Grid.Column="1" Text="{Binding LocalName}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto" VerticalOptions="Center">
+                        <Label Text="Is Advertising" VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding IsAdvertising, Mode=TwoWay}" HorizontalOptions="Start" />
+                    </Grid>
+                </StackLayout>
+
+                <!-- Command characteristic -->
+                <StackLayout>
+                    <Label Text="Command characteristic" FontAttributes="Bold" />
+                    <Label Text="{x:Static const:Constants.TMLinkWriteCommandCharacteristicId}" TextColor="Green" />
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto" ColumnSpacing="8">
+                        <Label Grid.Row="0" Text="Last Write Time" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding LastWriteTime}" />
+                        <Label Grid.Row="1" Text="Last Write Value" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding LastWriteValue}" />
+                    </Grid>
+                </StackLayout>
+
+                <!-- Notify message ready characteristic -->
+                <StackLayout>
+                    <Label Text="Notify message ready characteristic" FontAttributes="Bold" />
+                    <Label Text="{x:Static const:Constants.TMLinkMessageReadyCharacteristicId}" TextColor="Green" />
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto" ColumnSpacing="8">
+                        <Label Grid.Row="0" Text="Subscribers" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Subscribers}" />
+                        <Label Grid.Row="1" Text="Last Value" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding SubscribersLastValue}" />
+                    </Grid>
+                </StackLayout>
+
+                <!-- Read message characteristic -->
+                <StackLayout>
+                    <Label Text="Read message characteristic" FontAttributes="Bold" />
+                    <Label Text="{x:Static const:Constants.TMLinkReadMessageCharacteristicId}" TextColor="Green" />
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto" ColumnSpacing="8">
+                        <Label Grid.Row="0" Text="Last Read Time" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding LastReadTime}" />
+                        <Label Grid.Row="1" Text="Last Read Value" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding LastReadValue}" />
+                    </Grid>
+                </StackLayout>
+
+                <!-- Notify live measurement characteristic -->
+                <StackLayout>
+                    <Label Text="Notify live measurement characteristic" FontAttributes="Bold" />
+                    <Label Text="{x:Static const:Constants.TMLinkLiveCharacteristicId}" TextColor="Green" />
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto, Auto, Auto" ColumnSpacing="8">
+                        <Label Grid.Row="0" Text="Subscribers" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding LiveSubscribers}" />
+                        <Label Grid.Row="1" Text="Thickness" VerticalOptions="Center" />
+                        <Entry Grid.Row="1" Grid.Column="1" Text="{Binding LiveThickness, Mode=TwoWay}" />
+                        <Label Grid.Row="2" Text="Is Live Measurement Frozen" VerticalOptions="Center" />
+                        <Switch Grid.Row="2" Grid.Column="1" IsToggled="{Binding IsLiveMeasurementFrozen}"/>
+                        <Label Grid.Row="3" Text="Last Notification Time" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding LastLiveNotificationTime}" />
+                    </Grid>
+                </StackLayout>
+
+                <!-- Read frozen measurement characteristic -->
+                <StackLayout>
+                    <Label Text="Read frozen measurement characteristic" FontAttributes="Bold" />
+                    <Label Text="{x:Static const:Constants.TMLinkFrozenCharacteristicId}" TextColor="Green" />
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto">
+                        <Label Text="Last Read Time" />
+                        <Label Grid.Column="1" Text="{Binding LastFrozenReadTime}" />
+                    </Grid>
+                </StackLayout>
+
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
