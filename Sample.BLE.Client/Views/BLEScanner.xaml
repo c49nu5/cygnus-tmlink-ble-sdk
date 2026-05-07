@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Sample.BLE.Client.Views"
+             xmlns:local="clr-namespace:Sample.BLE.Client.ViewModels"
+             xmlns:models="clr-namespace:Cygnus.Models;assembly=Cygnus.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:DataType="local:BLEScannerViewModel"
+             Title="Cygnus TML Link Gauges"
+             x:Class="Sample.BLE.Client.Views.BLEScanner">
+    <ContentPage.MenuBarItems>
+        <MenuBarItem Text="Settings">
+            <MenuFlyoutSubItem Text="Units">
+                <MenuFlyoutItem Command="{Binding SetUnitsCommand}" CommandParameter="{x:Static models:MeasurementUnits.Metric}" Text="Metric"/>
+                <MenuFlyoutItem Command="{Binding SetUnitsCommand}" CommandParameter="{x:Static models:MeasurementUnits.Imperial}" Text="Imperial"/>
+            </MenuFlyoutSubItem>
+            <MenuFlyoutSubItem Text="Resolution">
+                <MenuFlyoutItem Command="{Binding SetResolutionCommand}" CommandParameter="{x:Static models:MeasurementResolution.Low}" Text="Low"/>
+                <MenuFlyoutItem Command="{Binding SetResolutionCommand}" CommandParameter="{x:Static models:MeasurementResolution.Medium}" Text="Medium"/>
+                <MenuFlyoutItem Command="{Binding SetResolutionCommand}" CommandParameter="{x:Static models:MeasurementResolution.High}" Text="High"/>
+            </MenuFlyoutSubItem>
+        </MenuBarItem>
+    </ContentPage.MenuBarItems>
+    <Grid Margin="10" RowSpacing="8" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <HorizontalStackLayout Grid.Row="0">
+            <Button Text="{Binding ToggleScanningCmdLabelText}"
+                Command="{Binding ToggleScanning}" />
+            <ActivityIndicator IsRunning="{Binding IsScanning}" Margin="8"/>
+
+        </HorizontalStackLayout>
+
+        <CollectionView
+            Grid.Row="1"
+            x:Name="GaugeList"
+            VerticalOptions="Start" 
+            ItemsSource="{Binding Path=Gauges}" SelectionMode="None"
+            SelectedItem="{Binding SelectedGauge, Mode=OneWay}"
+            SelectionChanged="GaugeList_SelectionChanged"
+            Background="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type local:GaugeViewModel}">
+                    <HorizontalStackLayout Padding="10, 0">
+                        <VerticalStackLayout  VerticalOptions="Center">
+                            <HorizontalStackLayout Spacing="10">
+                                <Label Text="{Binding Name}" WidthRequest="140"/>
+                                <Label Text="{Binding SerialNumber}" WidthRequest="80"/>
+                                <Label Text="{Binding FirmwareVersion}" WidthRequest="80"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                        <Button 
+                            Text="Connect" 
+                            Command="{Binding ConnectCommand, Source={x:RelativeSource AncestorType={x:Type local:BLEScannerViewModel}}, x:DataType=local:BLEScannerViewModel}" 
+                            CommandParameter="{Binding}" 
+                            IsVisible="{Binding IsConnected, Converter={toolkit:InvertedBoolConverter}}"
+                            Margin="10"/>
+                    </HorizontalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>

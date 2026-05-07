@@ -1,0 +1,25 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Cygnus.Models;
+using Cygnus.BLE.Protobuf.Interfaces;
+
+namespace Sample.BLE.Client.ViewModels
+{
+    public partial class RecordViewModel : ObservableObject, ITransferRequest, IDeleteRequest
+    {
+        public string Key { get; internal set; } = string.Empty;
+        public string Name { get; internal set; } = string.Empty;
+        public RecordType RecordType { get; internal set; }
+        public uint MeasurementCount { get; internal set; }
+        public uint MeasurementsTaken { get; internal set; }
+        public DateTime? Created { get; internal set; }
+        public DateTime? Updated { get; internal set; }
+
+        [ObservableProperty]
+        public partial double PercentageTransferred { get; set; }
+
+        [ObservableProperty]
+        public partial TransferStatus Status { get; set; }
+
+    }
+}
+

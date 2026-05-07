@@ -1,0 +1,561 @@
+syntax = "proto3";                            
+package Cygnus.BLE.Protobuf.V1;    
+import "google/protobuf/timestamp.proto";
+
+// =====================================================================================================
+// # BLE Arrangement.
+// =====================================================================================================
+//
+// The C1Ex Gauge is the Server, peripheral role.
+// The PC/Table is the Client, central role.
+//
+// ## The Server profile exposes these service characteristics for communication.
+//
+// - WriteCommand           WRITE  - For the Client to send a Command to the Gauge.
+// - NotifyMessageReady     NOTIFY - For Client notifications of Messages sent from the Gauge.
+// - ReadMessage            READ   - For the Client to read a Message sent from the Gauge.
+// - NotifyLiveMeasurement  NOTIFY - For Client notifications of LiveMeasurements from the Gauge.
+// - ReadLiveMeasurement    READ   - For the Client to read a Frozen LiveMeasurement from the Gauge.
+//
+// ## Record and BScan Transfers.
+// The Client always initiates an exchange by sending a Command to the Server, the Server will respond
+// to a Command by making a Message available for the Client to read. The Client subscribes to a Notify
+// characteristic that signals what a new message is ready to be read.
+//
+// ## Live Measurements.
+// The Client can subscribe to LiveMeasurement notifications. There are two types of notification,
+//
+// - Live
+// - Frozen
+//
+// ### Type Live are real-time measurements streamed from the gauge at a maximum rate of 10Hz. Then are small 
+// messages without any A-Scan data, and all the data in contained in the notification message.
+//
+// ### Type Frozen are sent when the user Freezes measurement on the gauge, the Client can then read the 
+// measurement data which contains A-Scan data.
+//
+//
+// -------------------------------------------------------------------------------
+// ## Procedure for getting the GaugeInfo from the Gauge.
+//
+// 1. Client subscribes to NotifyMessageReady.
+//
+// 2. Prepare a GetGaugeInfo Command message.
+//    Set the commandType to GetGaugeInfo.
+//    Set the timestamp so the gauges RTC will be synchronised.
+//    Send the Command message.
+//
+// 3. Wait for a notification Message with a command type = GetGaugeInfo.
+//    If readDataAvailable is true proceed, else look at errorCode.
+//    Read the GaugeInfo data from the ReadMessage characteristic.
+//    The gauge info data is contained in the GaugeInfo object.
+//
+// -------------------------------------------------------------------------------
+// ## Procedure for getting a Record List from the Gauge.
+//
+// 1. Client subscribes to NotifyMessageReady.
+//
+// 2. Prepare a GetRecordList Command message.
+//    Set the commandType to GetRecordList.
+//    Send the Command message.
+//
+// 3. Wait for a notification Message with a command type = GetRecordList.
+//    If readDataAvailable is true proceed, else look at errorCode.
+//    Read the RecordList data from the ReadMessage characteristic.
+//    The record list data is contained in the RecordList object.
+//
+// -------------------------------------------------------------------------------
+// ## Procedure for getting an existing Record from the Gauge.
+//
+// 1. Client subscribes to NotifyMessageReady.
+//
+// 2. Prepare a GetRecord Command message.
+//    Set the commandType to GetRecord.
+//    Set the recordName as required.
+//    Send the Command message.
+//
+// 3. Wait for a notification Message with a command type = GetRecord.
+//    If readDataAvailable is true proceed, else look at errorCode.
+//    Read the Record data from the ReadMessage characteristic.
+//    The record header data is contained in the Record object.
+//
+// 4. To get the Record's Measurements Points,
+//    Prepare a GetRecordPoint Command message.
+//    Set the recordName as required.
+//    Send the Command message.
+//
+// 5. Wait for a notification Message with a command type = GetRecordPoint.
+//    If readDataAvailable is true proceed, else look at errorCode.
+//    Read the RecordPoint data from the ReadMessage characteristic.
+//    The record point data is contained in the array of RecordPoint objects.
+//
+// -------------------------------------------------------------------------------
+// ## Procedure for sending a new Record to the Gauge.
+//
+// 1. Client subscribes to NotifyMessageReady.
+//
+// 2. Prepare a NewRecord Command message.
+//    Set the commandType to NewRecord.
+//    Populate the NewRecord values as required.
+//    Send the Command message.
+//
+// 3. Wait for a notification Message with a command type = NewRecord.
+//    If readDataAvailable is true proceed, else look at errorCode.
+//
+// 4. Prepare a AddRecordPoints Command message.
+//    Set the commandType to AddRecordPoints.
+//    Populate the AddRecordPoints values as required.
+//    Send the Command message.
+//
+// 5. Wait for a notification Message with a command type = AddRecordPoints.
+//    If readDataAvailable is true proceed, else look at errorCode.
+//
+// 6. Repeat sending AddRecordPoints command  messages until all your Points have 
+//    been sent. For example, to send 56 Points send,
+//    10 x AddRecordPoints with 10 Points and
+//    1 x AddRecordPoints with 6 Points.
+//
+// -------------------------------------------------------------------------------
+// ### Procedure for deleting an existing Record from the Gauge.
+//
+// 1. Client subscribes to NotifyMessageReady.
+//
+// 2. Prepare a DeleteRecord Command message.
+//    Set the commandType to DeleteRecord.
+//    Set the recordName as required.
+//    Send the Command message.
+//
+// 3. Wait for a notification Message with a command type = DeleteRecord.
+//    If the errorCode is Success then the record was deleted.
+//
+// -------------------------------------------------------------------------------
+// ## Procedure for getting BScans from the Gauge follows the same pattern as 
+// getting Records, the BScan commands are;
+//
+// 1. Client subscribes to NotifyMessageReady.
+// 2. GetBScanList to get a list of BScans on the gauge.
+// 3. GetBScan to get a BScan header, followed by GetBScanPoint to the measurement points.
+// 4. DeleteBScan to delete a BScan.
+// 5. DeleteAllBScans to delete all the BScans from the gauge.
+//
+//
+// -------------------------------------------------------------------------------
+// ## Procedure for getting LiveMeasurements from the gauge.
+//
+// 1. Client subscribes to NotifyLiveMeasurement.
+// 2. Wait for a NotifyLiveMeasurement, the liveMeasurementType tells you what is available.
+// 3. If liveMeasurementType = Live data is in the notification.
+// 4. If liveMeasurementType = Frozen data must be read from ReadLiveMeasurement characteristic.
+//    Read the FrozenMeasurement data from the ReadLiveMeasurement characteristic.
+//
+// -------------------------------------------------------------------------------
+
+
+// =====================================================================================================
+// # Proto Message Compression #
+// =====================================================================================================
+//
+// ## GZip is used to compress and decompress proto messages.
+// All proto messages are compressed after packing with the exception of messages sent as notifications,
+//
+// - message NotifyMessage
+// - message NotifyLiveMeasurement
+//
+
+
+// =====================================================================================================
+// # Proto Messages Section #
+// =====================================================================================================
+
+
+// --------------------------------------------------------------------------------------------------- 
+// ## NotifyMessage is used to notify the Client that a new Message is ready to read. 
+// Used for the BLE Service 'NotifyMessageReady' characteristic.
+// NotifyMessage messages are never gzip compressed.
+//
+message NotifyMessage
+{
+    CommandType commandType               = 1;          // The command that triggered this message.
+	ErrorCodes errorCode                  = 2;			// Error code.
+	bool readDataAvailable                = 3;			// True if data for the client to read.
+}
+
+
+// --------------------------------------------------------------------------------------------------- 
+// ## Command contains the Command send from the Client to the gauge.
+// Used for the BLE Service 'WriteCommand' Write characteristic.
+// Command messages are always gzip compressed.
+//
+message Command
+{
+    CommandType commandType               = 1;          // The command type being sent in the message.
+    google.protobuf.Timestamp timestamp   = 2;          // Sets Gauge date-time when non-zero is sent.
+    string name                           = 3;          // Optional name of a Record or BScan. (30 chars max).
+    NewRecord newRecord                   = 4;          // Optional newRecord message.
+    AddRecordPoints addRecordPoints       = 5;          // Optional addRecordPoints message.
+
+
+    // ------------------------------------------------------------------------------------------------
+    // Used to create a new Record in the gauge.
+    message NewRecord
+    {
+        string name                       = 1;          // record name or ID (30 chars max).
+        string key                        = 2;          // TML Key or ID  (30 chars max).
+        RecordType recordType             = 3;          // Linear or Grid
+        GridPattern gridPattern           = 4;          // Grid Pattern (if Grid type)
+        UOM uom                           = 5;          // Units of Measurement.
+        uint32 numColsX                   = 6;          // Linear or Grid X Dimension 1..N.
+        uint32 numRowsY                   = 7;          // Grid Y coordinate 1..N.
+    }
+    
+    // ------------------------------------------------------------------------------------------------
+    // Used to add blank points to a new record.
+    // Send in blocks of 1..10 points.
+    // If more than 10 points are sent, the message will be discarded and a NAK response returned.
+    message AddRecordPoints
+    {
+        string name                      = 1;           // record name or ID (30 chars max).
+        repeated MPoint mpoints          = 2;           // Array of 1..10 measurement points per message.
+        
+        // ---------------------------------------------------------------
+        message MPoint
+        {
+            string name                  = 1;           // point name (30 chars max).
+            uint32 key                   = 2;           // TML Key or ID number.
+            Method method                = 3;           // Method; Spot or Scan.
+            uint32 colNumX               = 4;           // Linear or Grid X Coordinate, 0 based.
+            uint32 rowNumY               = 5;           // Grid Y coordinate, 0 based.
+            uint32 minThickness          = 6;           // Minimum thickness warning (in UoM) or zero if not required.
+            uint32 maxThickness          = 7;           // Maximum thickness warning (in UoM) or zero if not required.
+        }
+    }
+}
+
+
+// ---------------------------------------------------------------------------------------------------
+// ## Message contains the message sent from the gauge to the Client in response to a received Command.
+// Example, for a GetRecodList command, the reply would be [Message] with [RecordList] data.
+// Used for the BLE Service 'ReadMessage' Read Characteristic.
+// Message messages are always gzip compressed.
+//
+message Message
+{
+    CommandType commandType               = 1;          // The command that triggered this message.
+    GaugeInfo gaugeInfo                   = 2;          // An optional GaugeInfo message.
+    RecordList recordList                 = 3;          // An optional Record List.
+    Record record                         = 4;          // An optional Record.
+    RecordPoint recordPoint               = 5;          // An optional RecordPoint.
+    BScanList bscanList                   = 6;          // An optional BScan List.
+    BScan bscan                           = 7;          // An optional BScan.
+    BScanPoint bscanPoint                 = 8;          // An optional BScanPoint.
+	
+    // ------------------------------------------------------------------------------------------------
+    // Contains info about the Gauge.
+    message GaugeInfo
+    {
+        uint32 serialNumber               = 1;          // Gauge serial number.
+        uint32 gaugeUD                    = 2;          // Gauge ID number.
+        uint32 versionNumber              = 3;          // Version number as Major.Minor.Build [U8,U8,U16]
+        uint32 batteryLevel               = 4;          // Battery level in percent.
+        GaugeVariant gaugeVariant         = 5;          // Gauge variant enum.
+    }
+    
+    // ------------------------------------------------------------------------------------------------
+    // Contains a list of Record found on the gauge.
+    message RecordList
+    {
+        repeated Item items              = 1;           // Array of 0..N record items.
+        
+        // ---------------------------------------------------------------
+        message Item
+        {
+            string name                       = 1;      // record name or ID (30 chars max).
+            string key                        = 2;      // TML Key or ID  (30 chars max).
+            uint32 fileSize                   = 3;      // size of the record file in bytes.
+            google.protobuf.Timestamp created = 4;      // timestamp when record file created.
+            google.protobuf.Timestamp updated = 5;      // timestamp when record file last saved.
+            RecordType recordType             = 6;      // type - Linear, Grid.
+            uint32 numPointsRequired          = 7;      // number of measurement points required.
+            uint32 numPointsTaken             = 8;      // number of measurement points taken.
+        }
+    }
+
+    
+    // ------------------------------------------------------------------------------------------------
+    // Contains record 'header' data.
+    // Any measurement points will follow in subsequent messages.
+    message Record
+    {
+        uint32 recordID                       = 1;          // RecordID.
+        string name                           = 2;          // record name or ID (30 chars max).
+        string location                       = 3;          // location name or ID (16 chars max).
+        string surveyor                       = 4;          // surveyor name or ID (16 chars max).
+        string key                            = 5;          // TML Key or ID (30 chars max).
+        google.protobuf.Timestamp created     = 6;          // timestamp when record file created.
+        google.protobuf.Timestamp updated     = 7;          // timestamp when record file last saved.
+        RecordType recordType                 = 8;
+        uint32 numPointsRequired              = 9;
+        uint32 numPointsTaken                 = 10;         // The number of RecordPoint messages to read.
+    }
+    
+    // ------------------------------------------------------------------------------------------------
+    // Contains a single Measurement Point belonging to a Record.
+    message RecordPoint
+    {
+        uint32 recordID                       = 1;          // Links this MPoint to a Record.
+        string name                           = 2;          // Point Name (30 chars max).
+        uint32 key                            = 3;          // TML Key or ID value.
+        MeasurementPointState state           = 4;          // The measurement state.
+        Method method                         = 5;          // Method; Spot or Scan.
+        UOM uom                               = 6;          // Units of Measurement.
+        uint32 thickness                      = 7;          // Thickness value in UOM.
+        uint32 velocity                       = 8;          // Velocity of sound in UOM.
+        ProbeType probeType                   = 9;          // Probe type; Single, Dual.
+        UTMode UTMode                         = 10;         // UT Measurement Mode; SE/EE/ME.
+        google.protobuf.Timestamp taken       = 11;         // Measurement taken timestamp.
+        uint32 colNumX                        = 12;         // Linear or Grid X Coordinate, 0 based.
+        uint32 rowNumY                        = 13;         // Grid Y coordinate, 0 based.
+		AScan ascan                           = 14;         // optional AScan Data.
+    }
+        
+    // ------------------------------------------------------------------------------------------------
+    // Contains a list of BScan found on the gauge.
+    message BScanList
+    {
+        repeated Item items                   = 1;          // Array of 0..N record items.
+        
+        // ---------------------------------------------------------------
+        message Item
+        {
+            string name                       = 1;          // record name or ID (30 chars max).
+            string key                        = 2;          // TML Key or ID  (30 chars max).
+            uint32 fileSize                   = 3;          // size of the bscan file in bytes.
+            google.protobuf.Timestamp updated = 4;          // timestamp bscan file last saved.
+            uint32 numScanPoints              = 6;          // number of measurement points in the scan.
+        }
+    }
+        
+    // ------------------------------------------------------------------------------------------------
+    // Contains BScan 'header' data.
+    // Any scan points will follow in subsequent messages.
+    message BScan
+    {
+        uint32 BScanID                        = 1;          // BScanID.
+        string name                           = 2;          // BScan name or ID (30 chars max).
+        string key                            = 3;          // TML Key or ID (30 chars max).
+        google.protobuf.Timestamp updated     = 4;          // record last save timestamp.
+        uint32 numScanPoints                  = 5;          // number of measurement points in the scan.
+        uint32 scanInterval                   = 6;          // Scan internal in ms.
+    }
+    
+    // ------------------------------------------------------------------------------------------------
+    // Contains a single Measurement Point belonging to a BScan.
+    message BScanPoint
+    {
+        uint32 BScanID                        = 1;           // Links this MPoint to a BScan.
+        UOM uom                               = 2;           // Units of Measurement.
+        uint32 thickness                      = 3;           // Thickness value in UOM.
+        uint32 velocity                       = 4;           // Velocity of sound in UOM.
+        ProbeType probeType                   = 5;           // Probe type; Single, Dual.
+        UTMode UTMode                         = 6;           // UT Measurement Mode; SE/EE/ME.
+        uint32 scanPointNum                   = 7;           // Point Number in scan, 0 based.
+		AScan ascan                           = 8;           // optional AScan Data.
+    }
+}
+
+
+// --------------------------------------------------------------------------------------------------- 
+// ## A live measurement notification message.
+// NotifyLiveMeasurement messages are never gzip compressed.
+//
+message NotifyLiveMeasurement
+{
+	LiveMeasurementType liveMeasurementType  = 1;            // Informs of the Live Measurement type.
+	//
+	// If liveMeasurementType == Live these items are included..
+	//
+	uint32 index                             = 2;            // Measurement index number.
+	uint32 statusBits                        = 3;            // Status Bits x 5 [DEEPCOAT, INCHES, FROZEN, STABLE, VALID](LSB).
+	UTMode UTMode                            = 4;            // UT Measurement Mode; SE/EE/ME.
+	uint32 thickness                         = 5;            // Thickness value in UOM.
+	uint32 velocity                          = 6;            // Velocity of sound in UOM.
+	uint32 gaindB                            = 7;            // Gain set in dB
+	uint32 surfaceTemp                       = 8;            // Surface temp in C if High Temp mode, else zero.
+	uint32 batteryLevel                      = 9;            // Battery level in percent.
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// ## Contains a single Frozen Live Measurement.
+// FrozenLiveMeasurement messages are always gzip compressed.
+//
+message FrozenLiveMeasurement
+{
+	uint32 index                          = 1;            // Measurement index number.
+	uint32 serialNumber                   = 2;            // Gauge serial number.
+	uint32 gaugeUD                        = 3;            // Gauge ID number.
+	uint32 batteryLevel                   = 4;            // Battery level in percent.
+	bool validMeasurement                 = 5;            // True when valid measurement.
+	bool stableMeasurement                = 6;            // True when stable measurement.
+	UOM uom                               = 7;            // Units of Measurement.
+	uint32 thickness                      = 8;            // Thickness value in UOM.
+	uint32 velocity                       = 9;            // Velocity of sound in UOM.
+	ProbeType probeType                   = 10;           // Probe type; Single, Dual.
+	UTMode UTMode                         = 11;           // UT Measurement Mode; SE/EE/ME.
+	uint32 gaindB                         = 12;           // Gain set in dB
+	uint32 surfaceTemp                    = 13;           // Surface temp In C if High Temp mode, else zero.
+	AScan ascan                           = 14;           // AScan data.
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// ## AScan Graph Data. Used by Messages and LiveMeasurements.
+// AScan messages are always gzip compressed.
+//
+message AScan
+{
+	AScanRectify rectify                  = 1;           // AScan graph rectification mode used.
+	uint32 ascanStart                     = 2;           // AScan graph start in UoM.
+	uint32 ascanWidth                     = 3;           // AScan graph width in UoM.
+	bytes ascanPoints                     = 4;           // AScan graph data points in %, from -120 to +120.
+	uint32 echo1                          = 5;           // Echo Marker for 1st Detected Echo in UoM (0=none).
+	uint32 echo2                          = 6;           // Echo Marker for 2nd Detected Echo in UoM (0=none).
+	uint32 echo3                          = 7;           // Echo Marker for 3rd Detected Echo in UoM (0=none).
+}
+
+
+// --------------------------------------------------------------------------------------------------- 
+// ## CommandType lists all the commands that can be sent from Client to Gauge via WriteCommand characteristic. 
+//
+enum CommandType 
+{                      
+    Non = 0;        
+    GetGaugeInfo             = 1;     // requests info about the Gauge (serial, model, variant, battery level etc).
+    CancelRecordTransfer     = 2;     // send to cancel a Record or BScan transfer from the gauge.
+    GetRecordList            = 3;     // requests a list of Records on the gauge.
+    GetRecord                = 4;     // requests a Record from the gauge.
+    GetRecordPoint           = 5;     // requests a Record's measurement point (No AScan data).
+    GetRecordPointAScan      = 6;     // requests a Record's measurement point (With AScan data).
+    DeleteRecord             = 7;     // requests a Record is deleted from the gauge.
+    DeleteAllRecords         = 8;     // requests all Records are deleted from the gauge.
+    NewRecord                = 9;     // sends a New blank Record to the Gauge.
+    AddRecordPoints          = 10;    // sends a block of 1..10 blank Points and adds to the new Record on the Gauge.
+    GetBScanList             = 11;    // requests a list of BScans on the gauge.
+    GetBScan                 = 12;    // requests a BScan from the gauge.
+    GetBScanPoint            = 13;    // requests a BScan's measurement point (No AScan data).
+    GetBScanPointAScan       = 14;    // requests a BScan's measurement point (With AScan data).
+    DeleteBScan              = 15;    // requests a BScan is deleted from the gauge.
+    DeleteAllBScans          = 16;    // requests all BScans are deleted from the gauge.
+}
+
+
+// =====================================================================================================
+// # Proto Enums Section #
+// =====================================================================================================
+
+enum ErrorCodes
+{
+	Success                   = 0;    // Success, no error.
+	RecordNotFound            = 1;    // The Record was not found.
+	BScanNotFound             = 2;    // The BScan was not found.
+	InvalidParameter          = 3;    // An invalid parameter was received in a command.
+	TransferNotStarted        = 4;    // Attempt to get Points before Header.
+	GzUncompressError         = 5;    // Gzip uncompress error.
+	ProtoUnpackError          = 6;    // Protobuf unpack error.
+	MemoryError               = 7;    // Gauge memory allocation error.
+	RecordSaveError           = 8;    // Failed to save Record data.
+	RecordNameError           = 9;    // Record name is invalid.
+	RecordZeroPoints          = 10;   // Attempt to created a record with zero points.
+	RecordPointNumError       = 11;   // Attempt to created a record with too many points.
+	TransferCancelled         = 12;   // Record or BScan transfer cancelled.
+}
+
+enum LiveMeasurementType
+{
+	Live   = 0;
+	Frozen = 1;
+}
+
+enum RecordType 
+{
+    Linear = 0;    // Measurements taken in a 1D list (use xColumns only).
+    Grid   = 1;    // Measurements taken in a 2D grid.
+}
+
+// The GridPattern must be specified when creating new Records whose RecordType is Grid.
+// This dictates the start and sequence of logging in the grid.
+enum GridPattern
+{
+    RDRD = 0;      // RightDown, RightDown..
+    LDLD = 1;      // LeftDown, LeftDown..
+    RURU = 2;      // RightUp, RightUp..
+    LULU = 3;
+    DRDR = 4;
+    DLDL = 5;
+    URUR = 6;
+    ULUL = 7;
+    RDLD = 8;
+    LDRD = 9;
+    RULU = 10;
+    LURU = 11;
+    URDR = 12;
+    ULDL = 13;
+    DRUR = 14;
+    DLUL = 15;
+}
+
+enum Method
+{
+    Spot = 0;       // Spot measurement.
+    Scan = 1;       // Scan measurement.
+}
+
+enum ProbeType
+{
+    Single = 0;     // Single crystal probe, direct contact.
+    Dual   = 1;     // Dual crystal probe, with delay line.
+}
+
+enum UOM
+{
+    Metric   = 0;   // Measurements are in micro-meters (m/10e6), velocity is in m/s.
+    Imperial = 1;   // Measurements are in thou's or milli-inches (in/10e3), velocity is in 10e4*inches/micro-second.
+}
+
+enum UTMode
+{
+    SE = 0;     // UT Mode 2 = Interface to First Back-wall Echo.
+    EE = 1;     // UT Mode 3 = Two Back-wall Echoes.
+    ME = 2;     // UT Mode 3 = Three Back-wall Echoes.
+    GT = 3;     // Manual Gates Used.
+}
+
+enum AScanRectify
+{
+    RF  = 0;    // No rectification, RF signal ranging from -120 to +120%.
+    FW  = 1;    // Full Wave rectified, signal ranging from 0 to +120%.
+    PHW = 2;    // Positive Half Wave rectified, signal ranging from 0 to +120%.
+    NHW = 3;    // Negative Half Wave rectified, signal ranging from 0 to +120%.
+}
+
+enum GaugeVariant
+{
+    Test     = 0;
+    Basic_SC = 1;
+    Basic_TC = 2;
+    Plus     = 3;
+    Pro      = 4;
+}
+
+enum MeasurementPointState
+{
+    Blank      = 0;     // The measurement is blank.
+    Valid      = 1;     // The measurement value is valid.
+    Deleted    = 2;     // The measurement has been deleted by the gauge user.
+    Obstructed = 3;     // The measurement position could not be accessed.
+    NoReading  = 4;     // No measurement could be obtained.
+}
+
+// =====================================================================================================
+// End of proto file.
+// =====================================================================================================
