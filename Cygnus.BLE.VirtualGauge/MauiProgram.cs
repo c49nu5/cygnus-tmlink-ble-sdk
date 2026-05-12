@@ -1,4 +1,6 @@
-﻿using Cygnus.BLE.VirtualGauge.ViewModels;
+﻿using Cygnus.BLE.Protobuf.Interfaces;
+using Cygnus.BLE.Protobuf.Services;
+using Cygnus.BLE.VirtualGauge.ViewModels;
 using Microsoft.Extensions.Logging;
 using Shiny;
 
@@ -19,7 +21,7 @@ public static class MauiProgram
 			});
         builder.Services.AddBluetoothLeHosting();
         builder.Services.AddSingleton<MainViewModel>();
-
+		builder.Services.AddSingleton<IProtobufMessageConverter, ProtobufMessageConverter>();
 #if DEBUG
         builder.Logging.AddDebug();
 #endif

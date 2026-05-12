@@ -48,7 +48,7 @@ namespace Cygnus.BLE.VirtualGauge.Models
 
         private void CreateRecordList()
         {
-            var recordCount = Random.Shared.Next(1, 20);
+            var recordCount = Random.Shared.Next(3, 10);
             Enumerable.Range(0, recordCount).ToList().ForEach(i =>
             {
                 var type = Random.Shared.Next(2) == 1 ? RecordType.Linear : RecordType.Grid;
@@ -129,7 +129,7 @@ namespace Cygnus.BLE.VirtualGauge.Models
 
         private void CreateBscanList()
         {
-            var BscanCount = Random.Shared.Next(1, 20);
+            var BscanCount = Random.Shared.Next(3, 10);
             Enumerable.Range(0, BscanCount).ToList().ForEach(i =>
             {
                 uint requiredPoints = (uint)Random.Shared.Next(140, 232);

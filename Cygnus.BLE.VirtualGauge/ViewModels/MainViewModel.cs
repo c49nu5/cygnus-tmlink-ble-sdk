@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Cygnus.BLE.Protobuf;
+using Cygnus.BLE.Protobuf.Interfaces;
 using Cygnus.BLE.VirtualGauge.Models;
 using Shiny.BluetoothLE.Hosting;
 using System.Data;
@@ -22,10 +22,12 @@ public partial class MainViewModel : ObservableObject
 
     private IDisposable? _liveNotifierSub;
     private IGattCharacteristic? _notifyLiveCharacteristic;
+    private readonly IProtobufMessageConverter _protobufMessageConverter;
 
-    public MainViewModel(IBleHostingManager hostingManager)
+    public MainViewModel(IBleHostingManager hostingManager, IProtobufMessageConverter protobufMessageConverter)
     {
         _hostingManager = hostingManager;
+        _protobufMessageConverter = protobufMessageConverter;
     }
 
     [ObservableProperty]
@@ -63,7 +65,7 @@ public partial class MainViewModel : ObservableObject
             {
                 cb.SetWrite(request =>
                 {
-                    var command = request.Data.FromZippedProtoBuf<Protobuf.V1.Command>();
+                    var command = _protobufMessageConverter.FromZippedProtoBuf<Protobuf.V1.Command>(request.Data);
                     _commandType = command.commandType;
                     Protobuf.V1.Message? message = new()
                     {
@@ -187,7 +189,7 @@ public partial class MainViewModel : ObservableObject
                             }
                     }
 
-                    readCharacteristicValue = message?.ToZippedProtobuf();
+                    readCharacteristicValue = _protobufMessageConverter.ToZippedProtobuf(message);
 
                     Task.Delay(200).ContinueWith(t =>
                     {
@@ -196,7 +198,7 @@ public partial class MainViewModel : ObservableObject
                             if (_notifyReadyCharacteristic != null)
                             {
                                 var messageReady = new Protobuf.V1.NotifyMessage { commandType = _commandType.Value, readDataAvailable = message != null };
-                                _notifyReadyCharacteristic.Notify(messageReady.ToProtobuf(), _notifyReadyCharacteristic.SubscribedCentrals.ToArray());
+                                _notifyReadyCharacteristic.Notify(_protobufMessageConverter.ToProtobuf(messageReady), _notifyReadyCharacteristic.SubscribedCentrals.ToArray());
                                 SubscribersLastValue = $"{_commandType} {DateTime.Now}";
                             }
                         });
@@ -251,7 +253,7 @@ public partial class MainViewModel : ObservableObject
                             if (!IsLiveMeasurementFrozen)
                             {
                                 Protobuf.V1.NotifyLiveMeasurement measurement = _gaugeData.CreateLiveMeasurement(Protobuf.V1.LiveMeasurementType.Live, LiveThickness);
-                                await notifier.Notify(measurement.ToProtobuf(), notifier.SubscribedCentrals.ToArray());
+                                await notifier.Notify(_protobufMessageConverter.ToProtobuf(measurement), notifier.SubscribedCentrals.ToArray());
                                 return DateTime.Now;
                             }
 
@@ -281,7 +283,7 @@ public partial class MainViewModel : ObservableObject
                 {
                     LastFrozenReadTime = DateTime.Now.ToString();
                     Protobuf.V1.FrozenLiveMeasurement measurement = _gaugeData.CreateFrozenLiveMeasurement(LiveThickness);
-                    return Task.FromResult(GattResult.Success(measurement.ToZippedProtobuf()));
+                    return Task.FromResult(GattResult.Success(_protobufMessageConverter.ToZippedProtobuf(measurement)));
                 });
             }
         );
@@ -290,14 +292,13 @@ public partial class MainViewModel : ObservableObject
     void BuildDeviceInformationService(IGattServiceBuilder serviceBuilder)
     {
         serviceBuilder.AddCharacteristic(
-            DeviceNameCharacteristicId,
+            DeviceModelCharacteristicId,
             cb =>
             {
                 cb.SetRead(request =>
                 {
-                    LastReadTime = DateTime.Now.ToString();
-                    byte[] chunk = Encoding.UTF8.GetBytes(LocalName);
-                    return Task.FromResult(GattResult.Success(chunk));
+                    byte[] deviceModel = Encoding.UTF8.GetBytes("C1Ex Virtual");
+                    return Task.FromResult(GattResult.Success(deviceModel));
                 });
             }
         );
@@ -308,8 +309,8 @@ public partial class MainViewModel : ObservableObject
             {
                 cb.SetRead(request =>
                 {
-                    byte[] protobufVersion = Encoding.UTF8.GetBytes(_gaugeData.GaugeInfo.serialNumber.ToString());
-                    return Task.FromResult(GattResult.Success(protobufVersion));
+                    byte[] serialNumber = Encoding.UTF8.GetBytes(_gaugeData.GaugeInfo.serialNumber.ToString());
+                    return Task.FromResult(GattResult.Success(serialNumber));
                 });
             }
         );
@@ -320,8 +321,8 @@ public partial class MainViewModel : ObservableObject
             {
                 cb.SetRead(request =>
                 {
-                    byte[] protobufVersion = Encoding.UTF8.GetBytes("1.4.10");
-                    return Task.FromResult(GattResult.Success(protobufVersion));
+                    byte[] firmwareRevision = Encoding.UTF8.GetBytes("1.4.11");
+                    return Task.FromResult(GattResult.Success(firmwareRevision));
                 });
             }
         );
@@ -344,8 +345,24 @@ public partial class MainViewModel : ObservableObject
             {
                 cb.SetRead(request =>
                 {
-                    byte[] protobufVersion = Encoding.UTF8.GetBytes("Cygnus Instruments");
-                    return Task.FromResult(GattResult.Success(protobufVersion));
+                    byte[] manufacturerName = Encoding.UTF8.GetBytes("Cygnus Instruments");
+                    return Task.FromResult(GattResult.Success(manufacturerName));
+                });
+            }
+        );
+    }
+
+    private void BuildGenericAccessService(IGattServiceBuilder serviceBuilder)
+    {
+        serviceBuilder.AddCharacteristic(
+            DeviceNameCharacteristicId,
+            cb =>
+            {
+                cb.SetRead(request =>
+                {
+                    LastReadTime = DateTime.Now.ToString();
+                    byte[] deviceName = Encoding.UTF8.GetBytes(LocalName);
+                    return Task.FromResult(GattResult.Success(deviceName));
                 });
             }
         );
@@ -360,10 +377,15 @@ public partial class MainViewModel : ObservableObject
             if (_hostingManager.IsAdvertising)
             {
                 _hostingManager.StopAdvertising();
-                _hostingManager.RemoveService(TMLinkServiceId);
             }
             else
             {
+                //await _hostingManager.AddService(
+                //    GenericAccessServiceId,
+                //    true,
+                //    BuildGenericAccessService
+                //);
+
                 await _hostingManager.AddService(
                     TMLinkServiceId,
                     true,
@@ -395,7 +417,7 @@ public partial class MainViewModel : ObservableObject
                 if (notifyLiveCharacteristic != null)
                 {
                     Protobuf.V1.NotifyLiveMeasurement measurement = _gaugeData.CreateLiveMeasurement(Protobuf.V1.LiveMeasurementType.Frozen, LiveThickness);
-                    await notifyLiveCharacteristic.Notify(measurement.ToProtobuf(), notifyLiveCharacteristic.SubscribedCentrals.ToArray());
+                    await notifyLiveCharacteristic.Notify(_protobufMessageConverter.ToProtobuf(measurement), notifyLiveCharacteristic.SubscribedCentrals.ToArray());
                 }
             });
         }
