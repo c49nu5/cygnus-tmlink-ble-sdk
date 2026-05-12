@@ -24,6 +24,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<GaugeViewModel>();
 		builder.Services.AddSingleton<Func<GaugeViewModel>>(s => s.GetRequiredService<GaugeViewModel>);
         builder.Services.AddTransientPopup<NewRecordView, NewRecordViewModel>();
+
         builder.Services.AddBleMauiServices();
 		builder.Services.AddCygnusServices();
 

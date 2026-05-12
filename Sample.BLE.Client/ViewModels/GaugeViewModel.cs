@@ -95,7 +95,10 @@ namespace Sample.BLE.Client.ViewModels
 
         [ObservableProperty]
         public partial string Name { get; set; } = string.Empty;
-
+        
+        [ObservableProperty]
+        public partial string Model { get; set; } = string.Empty;
+    
         [ObservableProperty]
         public partial string SerialNumber { get; set; } = string.Empty;
 
@@ -234,6 +237,7 @@ namespace Sample.BLE.Client.ViewModels
         partial void OnGaugeChanged(IBLEGauge value)
         {
             Name = value.Name;
+            Model = value.Model;
             SerialNumber = value.SerialNumber;
             FirmwareVersion = value.FirmwareVersion;
             value.AddObserver(this);
@@ -268,7 +272,7 @@ namespace Sample.BLE.Client.ViewModels
                 Index = liveMeasurement.Index,
                 IsDeepcoat = liveMeasurement.IsDeepcoat,
                 IsFrozen = liveMeasurement.IsFrozen,
-                Stability = liveMeasurement.IsStable ? "Stable" : "Unstable",
+                IsStable = liveMeasurement.IsStable,
                 IsValid = liveMeasurement.IsValid,
                 Mode = liveMeasurement.Mode,
                 SurfaceTemp = liveMeasurement.SurfaceTemp,

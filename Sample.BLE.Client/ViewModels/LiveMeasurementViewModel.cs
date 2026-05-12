@@ -24,7 +24,7 @@ namespace Sample.BLE.Client.ViewModels
 
         public bool IsFrozen { get; set; }
 
-        public string? Stability { get; set; }
+        public bool IsStable { get; set; }
 
         public bool IsValid { get; set; }
 

@@ -21,14 +21,14 @@
             <Label Text="{Binding LiveMeasurement.Mode}" VerticalOptions="Center" />
             <Label Text="{Binding LiveMeasurement.Thickness}" HorizontalTextAlignment="End" VerticalOptions="Center" />
             <Label Text="{Binding LiveMeasurement.Velocity}" HorizontalTextAlignment="End" VerticalOptions="Center" />
-            <Label Text="{Binding LiveMeasurement.Stability}" VerticalOptions="Center" />
+            <Label Text="{Binding LiveMeasurement.IsStable, Converter={toolkit:BoolToObjectConverter TrueObject='Stable', FalseObject='Unstable'}}" VerticalOptions="Center" />
             <Label IsVisible="{Binding LiveMeasurement.HasAScan, FallbackValue=false, TargetNullValue=false}" Text="Has AScan" VerticalOptions="Center"/>
         </HorizontalStackLayout>
 
         <Label 
             Grid.Row="1"
-           Text="Records"
-           FontSize="20"/>
+            Text="Records"
+            FontSize="20"/>
         <CollectionView
             x:Name="RecordList"
             Grid.Row="2" ItemsSource="{Binding Path=RecordList}" SelectionMode="Single"

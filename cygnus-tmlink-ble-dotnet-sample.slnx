@@ -1,7 +1,9 @@
 <Solution>
-  <Project Path="Sample.BLE.Client/Sample.BLE.Client.csproj" />
   <Folder Name="/Solution Items/">
+    <File Path="LICENSE" />
     <File Path="Protos/cyg_tml_api_v1.proto" />
+    <File Path="README.md" />
   </Folder>
   <Project Path="Cygnus.BLE.API.Maui/Cygnus.BLE.API.Maui.csproj" />
+  <Project Path="Sample.BLE.Client/Sample.BLE.Client.csproj" />
 </Solution>

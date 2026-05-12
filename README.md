@@ -6,7 +6,7 @@ The latest Cygnus 1Ex gauge firmware (from V1.4.xx) supports the TM-Link via BLE
 
 If you want to use the latest Cygnus 1Ex firmware and firmware update utilities please contact <service@cygnus-instruments.com>
 
-The characteristics of the BLE TM-Link Service allow writing commands, receiving notifications and reading responses which contain g-zipped, protobuf messages.  The protobuf messages are defined in the [cyg_tml_api_v1.proto](https://github.com/c49nu5/tmlink-dotnet-api/blob/master/Protos/cyg_tml_api_v1.proto) file.
+The characteristics of the BLE TM-Link Service allow writing commands, receiving notifications and reading responses which contain g-zipped, protobuf messages.  The protobuf messages are defined in the [cyg_tml_api_v1.proto](https://github.com/c49nu5/tmlink-dotnet-api/blob/master/Protos/cyg_tml_api_v1.proto) file, along with a description of the process for using them.
 
 There is a .Net API available for the TM-Link BLE Service, which can be found here [tmlink-dotnet-api](https://github.com/c49nu5/tmlink-dotnet-api)
 
@@ -20,7 +20,7 @@ This sample app is a good starting point if you want to build a web application 
 
 The code in the app can run in any browser that supports [Web-Bluetooth](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API).
 
-Open this repository in Visual Studio Code, ensure node is installed and configured correctly and the dependencies are installed. Then run the Launch Chrome or Launch Edge configuration, this will build the npm app and run using Vite.
+Ensure Node is installed, open this repository in Visual Studio Code, then run the Launch Chrome or Launch Edge configuration, this will install the dependencies, compile the typescript and and run the node app using Vite.
 
 The TypeScript code is located in the `Sample.BLE.TypeScript\src` folder. The app is loaded by `src\main.ts` but the majority of the logic for connecting to the TM-Link BLE Service and handling the communication is in `src\cygnus-1ex-ble.ts` file.
 
@@ -35,7 +35,7 @@ It's the types generated from the protobuf definition that allow the TypeScript 
 The first 4 methods in `cygnus-1ex-ble.ts` are the main ones that demonstrate how to encode/decode the protobuf messages they are:
 - serializeCommand, converts a protobuf Command instance to a g-zipped byte array that can be sent to the TM-Link command characteristic with id `de670902-8025-4c69-a40e-eccd60563713`.
 - deserializeNotifyReady, converts a byte array received from the notification characteristic `de670903-8025-4c69-a40e-eccd60563713` to a NotifyMessage protobuf instance that indicates a response to a command is ready to be read.
-- deserializeMessage, converts a g-zipped byte array received from the TM-Link BLE Service to a protobuf instance; this can be a Message from characteristic `de670904-8025-4c69-a40e-eccd60563713` or a FrozenLiveMeasurement from `de670907-8025-4c69-a40e-eccd60563713`.
+- deserializeMessage, converts a g-zipped byte array received from the TM-Link BLE Service to a protobuf instance; this can be a Message in response to Command sent from characteristic `de670904-8025-4c69-a40e-eccd60563713` or a FrozenLiveMeasurement from `de670907-8025-4c69-a40e-eccd60563713`.
 - deserializeNotifyLiveMeasurement, converts a byte array received from the live measurement characteristic `de670906-8025-4c69-a40e-eccd60563713` to a protobuf LiveMeasurement instance.
 
 ### Sample.BLE.Client Maui application
@@ -49,7 +49,7 @@ Note that it can be run on Windows, Android, MacOS or iOS, but the BLE functiona
 Make sure to have Bluetooth enabled on your device and a Cygnus 1Ex gauge with communication mode configured as TM-Link via BLE.
 
 ### Cygnus.BLE.VirtualGauge Maui application
-Open the `cygnus-tmlink-ble-dotnet-virtual-gauge.slnx` solution file in Visual Studio, set the `Cygnus.BLE.VirtualGauge` project as the startup project and run it on a mobile device with Bluetooth capabilities.
+Open the `cygnus-tmlink-ble-dotnet-virtual-gauge.slnx` solution file in Visual Studio and run it on a mobile device with Bluetooth capabilities.
 The app has been tested on Android, but it should also work on iOS. 
 
-Once the app is running, it will host the TM-Link BLE Service and simulate a Cygnus 1Ex gauge. You can then connect to it using the Sample.BLE.Client application or any other BLE client that supports the TM-Link Service.
+Once the app is running, it will host the TM-Link BLE Service and simulate a Cygnus 1Ex gauge. You can then connect to it using the Sample.BLE.Client application or any other TM-Link client.

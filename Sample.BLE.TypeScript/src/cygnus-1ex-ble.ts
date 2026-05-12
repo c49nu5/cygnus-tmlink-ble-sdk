@@ -12,7 +12,7 @@ export class CygnusBLE {
   private TMLinkLiveCharacteristicId = 'de670906-8025-4c69-a40e-eccd60563713'
   private TMLinkFrozenCharacteristicId = 'de670907-8025-4c69-a40e-eccd60563713'
   private deviceInformationServiceId = '0000180a-0000-1000-8000-00805f9b34fb'
-  //  private measurementCharacteristic = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'//'00002a00-0000-1000-8000-00805f9b34fb'
+  private genericAccessServiceId = '00001800-0000-1000-8000-00805f9b34fb'//'00002a00-0000-1000-8000-00805f9b34fb'
   private detectedBluetoothDevice: BluetoothDevice | undefined
   private utf8decoder: TextDecoder = new TextDecoder('utf-8');
 
@@ -393,10 +393,9 @@ export class CygnusBLE {
 
   private getDeviceInfo() {
     let options = {
-      optionalServices: [this.TMLinkServiceId, this.bleServiceId, this.deviceInformationServiceId],
+      optionalServices: [this.TMLinkServiceId, this.bleServiceId, this.deviceInformationServiceId, this.genericAccessServiceId],
       filters: [
         { services: [this.TMLinkServiceId] },
-        { services: [this.deviceInformationServiceId] },
         { services: [this.bleServiceId] }
       ]
     }
