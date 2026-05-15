@@ -1,7 +1,7 @@
 # cygnus-tmlink-ble-sdk
 A SDK for the Cygnus TM-Link BLE (Bluetooth Low Energy) Service.
 
-## TM-Link
+## TM-Link Overview
 * *'TM-Link' = Thickness Measurement data Link.* *
 
 TM-Link can be used to send and receive data-logging records and B-Scans to a Cygnus 1 Ex ultrasonic thickness gauge, and you can also subscribe to receive Live Measurements from the gauge. 
