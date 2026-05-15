@@ -88,7 +88,7 @@ The CHARACTERISTIC_MODEL_NUMBER_STRING will return one of the following dependin
 
 The CHARACTERISTIC_FIRMWARE_REVISION_STRING will return the gauge firmware version in this format "Major.Minor.Build"
 
-The CHARACTERISTIC_SOFTWARE_REVISION_STRING will return the proto message file version, this can be used to handle different proto files should the interface be extended in the future. 
+The CHARACTERISTIC_SOFTWARE_REVISION_STRING will return the proto message file version string, this can be used to handle different proto files should the interface be extended in the future. This version will match the package version in the proto file, for example 'package Cygnus.BLE.Protobuf.V1;' will return string '1'.
 
 
 
