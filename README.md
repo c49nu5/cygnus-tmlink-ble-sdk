@@ -53,3 +53,44 @@ Open the `cygnus-tmlink-ble-dotnet-virtual-gauge.slnx` solution file in Visual S
 The app has been tested on Android, but it should also work on iOS. 
 
 Once the app is running, it will host the TM-Link BLE Service and simulate a Cygnus 1Ex gauge. You can then connect to it using the Sample.BLE.Client application or any other TM-Link client.
+
+## Bluetooth Information
+To enable TM-Link Bluetooth services on the Cygnus 1Ex gauge, from the Setup menu, set Comms Mode to **TM-Link**.
+
+### Bluetooth LE Profile
+The Cygnus 1Ex gauge Bluetooth LE profile contains the folowing services
+
+- **GATT_SERVICE_GENERIC_ACCESS** (0x1800)
+  - CHARACTERISTIC_DEVICE_NAME (0x2A00)
+
+- **GATT_SERVICE_DEVICE_INFORMATION** (0x180A)
+  - CHARACTERISTIC_SERIAL_NUMBER_STRING (0x2A25)
+  - CHARACTERISTIC_MANUFACTURER_NAME_STRING (0x2A29)
+  - CHARACTERISTIC_MODEL_NUMBER_STRING (0x2A24)  
+  - CHARACTERISTIC_FIRMWARE_REVISION_STRING (0x2A26)
+  - CHARACTERISTIC_SOFTWARE_REVISION_STRING (0x2A28)
+
+- **GATT_SERVICE_CUSTOM_TMLINK** (DE670901-8025-4C69-A40E-ECCD60563713)
+  - CHARACTERISTIC_WRITE_COMMAND (DE670902-8025-4C69-A40E-ECCD60563713) WRITE
+  - CHARACTERISTIC_NOTIFY_MESSAGE_READY (DE670903-8025-4C69-A40E-ECCD60563713) NOTIFY         
+  - CHARACTERISTIC_READ_MESSAGE (DE670904-8025-4C69-A40E-ECCD60563713) READ  
+  - CHARACTERISTIC_NOTIFY_LIVE_MEASUREMENT (DE670906-8025-4C69-A40E-ECCD60563713) NOTIFY
+  - CHARACTERISTIC_READ_LIVE_MEASUREMENT (DE670907-8025-4C69-A40E-ECCD60563713) READ
+
+The CHARACTERISTIC_DEVICE_NAME will return the string "Cygnus1Ex_000000" where the 000000 is the serial number of the gauge.
+
+The CHARACTERISTIC_MODEL_NUMBER_STRING will return one of the following depending on the gauge variant,
+
+- "C1Ex_Basic SC"
+- "C1Ex_Basic TC"
+- "C1Ex_Plus"
+- "C1Ex_Pro"
+
+The CHARACTERISTIC_FIRMWARE_REVISION_STRING will return the gauge firmware version in this format "Major.Minor.Build"
+
+The CHARACTERISTIC_SOFTWARE_REVISION_STRING will return the proto message file version, this can be used to handle different proto files should the interface be extended in the future. 
+
+
+
+
+
