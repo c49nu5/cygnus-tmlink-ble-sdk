@@ -1,6 +1,28 @@
 # cygnus-tmlink-ble-sdk
 A SDK for the Cygnus TM-Link BLE (Bluetooth Low Energy) Service.
 
+## TM-Link
+* *'TM-Link' = Thickness Measurement data Link.* *
+
+TM-Link can be used to send and receive data-logging records and B-Scans to a Cygnus 1 Ex ultrasonic thickness gauge, and you can also subscribe to receive Live Measurements from the gauge. 
+
+A typical workflow using TM-Link with APM/RBI software could be,
+
+- A plan for measuring various assets is created in the APM/RBI software, each route will contain a number of TML or CML locations each with a unique ID key.
+- These routes will become 'records' in the Cygnus 1 Ex Gauge.
+- These empty records are created and transferred to the Cygnus 1 Ex gauge using TM-Link services.
+- The Cygnus 1 Ex gauge is taken out into the field where the UT Technician opens each empty record and populates it with thickness measurements.
+- When all the measurements have been taken, the populated records are transferred from the Cygnus 1 Ex gauge using TM-Link services.
+- The populated records can then be processed and the thickness measurements data inserted back into the APM/RBI software
+
+A typical workflow using TM-Link with a mobile device with an Inspection Application could be,
+
+- The mobile device subscribes to Live Measurements from the Cygnus 1 Ex Gauge.
+- On site the UT Technician uses the mobile device Inspection Application to direct the thickness measurement survey.
+- The UT Technician takes thickness measurements which the mobile device captures and records against the asset location.
+
+[The Cygnus 1 Ex Gauge](https://cygnus-instruments.com/product/cygnus-1-ex/)
+
 ## TM-Link over BLE
 The latest Cygnus 1Ex gauge firmware (from V1.4.xx) supports the TM-Link via BLE communication mode. This allows you to connect to the gauge using a smartphone or computer and read data from it in real-time.
 
