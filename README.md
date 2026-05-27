@@ -1,6 +1,28 @@
 # cygnus-tmlink-ble-sdk
 A SDK for the Cygnus TM-Link BLE (Bluetooth Low Energy) Service.
 
+## TM-Link Overview
+* *'TM-Link' = Thickness Measurement data Link.* *
+
+TM-Link can be used to send and receive data-logging records and B-Scans to a Cygnus 1 Ex ultrasonic thickness gauge, and you can also subscribe to receive Live Measurements from the gauge. 
+
+A typical workflow using TM-Link with APM/RBI software could be,
+
+- A plan for measuring various assets is created in the APM/RBI software, each route will contain a number of TML or CML locations each with a unique ID key.
+- These routes will become 'records' in the Cygnus 1 Ex Gauge.
+- These empty records are created and transferred to the Cygnus 1 Ex gauge using TM-Link services.
+- The Cygnus 1 Ex gauge is taken out into the field where the UT Technician opens each empty record and populates it with thickness measurements.
+- When all the measurements have been taken, the populated records are transferred from the Cygnus 1 Ex gauge using TM-Link services.
+- The populated records can then be processed and the thickness measurements data inserted back into the APM/RBI software
+
+A typical workflow using TM-Link with a mobile device with an Inspection Application could be,
+
+- The mobile device subscribes to Live Measurements from the Cygnus 1 Ex Gauge.
+- On site the UT Technician uses the mobile device Inspection Application to direct the thickness measurement survey.
+- The UT Technician takes thickness measurements which the mobile device captures and records against the asset location.
+
+[The Cygnus 1 Ex Gauge](https://cygnus-instruments.com/product/cygnus-1-ex/)
+
 ## TM-Link over BLE
 The latest Cygnus 1Ex gauge firmware (from V1.4.xx) supports the TM-Link via BLE communication mode. This allows you to connect to the gauge using a smartphone or computer and read data from it in real-time.
 
@@ -53,3 +75,44 @@ Open the `cygnus-tmlink-ble-dotnet-virtual-gauge.slnx` solution file in Visual S
 The app has been tested on Android, but it should also work on iOS. 
 
 Once the app is running, it will host the TM-Link BLE Service and simulate a Cygnus 1Ex gauge. You can then connect to it using the Sample.BLE.Client application or any other TM-Link client.
+
+## Bluetooth Information
+To enable TM-Link Bluetooth services on the Cygnus 1Ex gauge, from the Setup menu, set Comms Mode to **TM-Link**.
+
+### Bluetooth LE Profile
+The Cygnus 1Ex gauge Bluetooth LE profile contains the folowing services
+
+- **GATT_SERVICE_GENERIC_ACCESS** (0x1800)
+  - CHARACTERISTIC_DEVICE_NAME (0x2A00)
+
+- **GATT_SERVICE_DEVICE_INFORMATION** (0x180A)
+  - CHARACTERISTIC_SERIAL_NUMBER_STRING (0x2A25)
+  - CHARACTERISTIC_MANUFACTURER_NAME_STRING (0x2A29)
+  - CHARACTERISTIC_MODEL_NUMBER_STRING (0x2A24)  
+  - CHARACTERISTIC_FIRMWARE_REVISION_STRING (0x2A26)
+  - CHARACTERISTIC_SOFTWARE_REVISION_STRING (0x2A28)
+
+- **GATT_SERVICE_CUSTOM_TMLINK** (DE670901-8025-4C69-A40E-ECCD60563713)
+  - CHARACTERISTIC_WRITE_COMMAND (DE670902-8025-4C69-A40E-ECCD60563713) WRITE
+  - CHARACTERISTIC_NOTIFY_MESSAGE_READY (DE670903-8025-4C69-A40E-ECCD60563713) NOTIFY         
+  - CHARACTERISTIC_READ_MESSAGE (DE670904-8025-4C69-A40E-ECCD60563713) READ  
+  - CHARACTERISTIC_NOTIFY_LIVE_MEASUREMENT (DE670906-8025-4C69-A40E-ECCD60563713) NOTIFY
+  - CHARACTERISTIC_READ_LIVE_MEASUREMENT (DE670907-8025-4C69-A40E-ECCD60563713) READ
+
+The CHARACTERISTIC_DEVICE_NAME will return the string "Cygnus1Ex_000000" where the 000000 is the serial number of the gauge.
+
+The CHARACTERISTIC_MODEL_NUMBER_STRING will return one of the following depending on the gauge variant,
+
+- "C1Ex_Basic SC"
+- "C1Ex_Basic TC"
+- "C1Ex_Plus"
+- "C1Ex_Pro"
+
+The CHARACTERISTIC_FIRMWARE_REVISION_STRING will return the gauge firmware version in this format "Major.Minor.Build"
+
+The CHARACTERISTIC_SOFTWARE_REVISION_STRING will return the proto message file version string, this can be used to handle different proto files should the interface be extended in the future. This version will match the package version in the proto file, for example 'package Cygnus.BLE.Protobuf.V1;' will return string '1'.
+
+
+
+
+
