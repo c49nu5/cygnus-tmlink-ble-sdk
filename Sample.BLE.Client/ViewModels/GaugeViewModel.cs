@@ -3,9 +3,9 @@ using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Cygnus.BLE.API.Interfaces;
-using Cygnus.Models;
+using Cygnus.BLE.Interfaces;
 using Cygnus.Interfaces;
-using Cygnus.BLE.Protobuf.Interfaces;
+using Cygnus.Models;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -39,7 +39,7 @@ namespace Sample.BLE.Client.ViewModels
         }
 
         [ObservableProperty]
-        public partial LiveMeasurementViewModel LiveMeasurement { get; set; }
+        public partial LiveMeasurementViewModel LiveMeasurement { get; set; } = new LiveMeasurementViewModel();
 
         public ICommand NewRecordCommand { get; private set; }
 
@@ -262,8 +262,8 @@ namespace Sample.BLE.Client.ViewModels
                 Gauge.UnsubscribeFromLiveUpdates();
             }   
         }
-        
-        public void UpdateLiveMeasurement(LiveMeasurement liveMeasurement)
+
+        public void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
         {
             LiveMeasurement = new LiveMeasurementViewModel
             {
@@ -284,4 +284,3 @@ namespace Sample.BLE.Client.ViewModels
         }
     }
 }
-

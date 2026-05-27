@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Cygnus.Interfaces;
 using Cygnus.Models;
-using Cygnus.BLE.Protobuf.Interfaces;
 
 namespace Sample.BLE.Client.ViewModels
 {

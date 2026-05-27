@@ -2,10 +2,10 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Sample.BLE.Client.Views"
-             xmlns:local="clr-namespace:Sample.BLE.Client.ViewModels"
+             xmlns:viewModels="clr-namespace:Sample.BLE.Client.ViewModels"
              xmlns:models="clr-namespace:Cygnus.Models;assembly=Cygnus.Models"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             x:DataType="local:BLEScannerViewModel"
+             x:DataType="viewModels:BLEScannerViewModel"
              Title="Cygnus TML Link Gauges"
              x:Class="Sample.BLE.Client.Views.BLEScanner">
     <ContentPage.MenuBarItems>
@@ -43,7 +43,7 @@
             SelectionChanged="GaugeList_SelectionChanged"
             Background="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="{x:Type local:GaugeViewModel}">
+                <DataTemplate x:DataType="{x:Type viewModels:GaugeViewModel}">
                     <HorizontalStackLayout Padding="10, 0">
                         <VerticalStackLayout  VerticalOptions="Center">
                             <HorizontalStackLayout Spacing="10">
@@ -55,7 +55,7 @@
                         </VerticalStackLayout>
                         <Button 
                             Text="Connect" 
-                            Command="{Binding ConnectCommand, Source={x:RelativeSource AncestorType={x:Type local:BLEScannerViewModel}}, x:DataType=local:BLEScannerViewModel}" 
+                            Command="{Binding ConnectCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:BLEScannerViewModel}}, x:DataType=viewModels:BLEScannerViewModel}" 
                             CommandParameter="{Binding}" 
                             IsVisible="{Binding IsConnected, Converter={toolkit:InvertedBoolConverter}}"
                             Margin="10"/>

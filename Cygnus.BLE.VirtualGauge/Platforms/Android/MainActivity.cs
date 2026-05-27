@@ -13,17 +13,17 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnCreate(savedInstanceState);
 
-        if (Build.VERSION.SdkInt > BuildVersionCodes.R && ActivityCompat.CheckSelfPermission(this, Manifest.Permission.BluetoothConnect) != Permission.Granted)
+        if (OperatingSystem.IsAndroidVersionAtLeast(31) && ActivityCompat.CheckSelfPermission(this, Manifest.Permission.BluetoothConnect) != Permission.Granted)
         {
             ActivityCompat.RequestPermissions(Platform.CurrentActivity, [Manifest.Permission.BluetoothConnect], 102);
         }
 
-        if (Build.VERSION.SdkInt > BuildVersionCodes.R && ActivityCompat.CheckSelfPermission(this, Manifest.Permission.BluetoothAdvertise) != Permission.Granted)
+        if (OperatingSystem.IsAndroidVersionAtLeast(31) && ActivityCompat.CheckSelfPermission(this, Manifest.Permission.BluetoothAdvertise) != Permission.Granted)
         {
             ActivityCompat.RequestPermissions(Platform.CurrentActivity, [Manifest.Permission.BluetoothAdvertise], 102);
         }
 
-        if (Build.VERSION.SdkInt <= BuildVersionCodes.R && ActivityCompat.CheckSelfPermission(this, Manifest.Permission.Bluetooth) != Permission.Granted)
+        if (!OperatingSystem.IsAndroidVersionAtLeast(31) && ActivityCompat.CheckSelfPermission(this, Manifest.Permission.Bluetooth) != Permission.Granted)
         {
             ActivityCompat.RequestPermissions(Platform.CurrentActivity, [Manifest.Permission.Bluetooth], 102);
         }

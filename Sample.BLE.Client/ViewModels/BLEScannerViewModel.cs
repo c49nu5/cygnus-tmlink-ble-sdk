@@ -1,8 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Cygnus.BLE.API.Interfaces;
-using Cygnus.Models;
+using Cygnus.BLE.Interfaces;
 using Cygnus.Interfaces;
+using Cygnus.Models;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;

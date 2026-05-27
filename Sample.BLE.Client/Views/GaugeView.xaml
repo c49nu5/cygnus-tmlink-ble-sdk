@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Sample.BLE.Client.ViewModels"
+             xmlns:viewModels="clr-namespace:Sample.BLE.Client.ViewModels"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:models="clr-namespace:Cygnus.Models;assembly=Cygnus.Models"
-             x:DataType="local:GaugeViewModel"
+             x:DataType="viewModels:GaugeViewModel"
              Title="{Binding Name}"
              x:Class="Sample.BLE.Client.Views.GaugeView">
     <Grid RowDefinitions="auto,auto,*,auto,*"
@@ -34,7 +34,7 @@
             Grid.Row="2" ItemsSource="{Binding Path=RecordList}" SelectionMode="Single"
             Background="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="{x:Type local:RecordViewModel}">
+                <DataTemplate x:DataType="{x:Type viewModels:RecordViewModel}">
                     <HorizontalStackLayout Padding="10,0" Spacing="5">
                         <VerticalStackLayout VerticalOptions="Center">
                             <Label Text="{Binding Name}" WidthRequest="150"/>
@@ -44,17 +44,17 @@
                         <Label Text="{Binding Created}" WidthRequest="160" VerticalOptions="Center"/>
                         <Button 
                             Text="X" 
-                            Command="{Binding DeleteRecordCommand, Source={x:RelativeSource AncestorType={x:Type local:GaugeViewModel}}, x:DataType=local:GaugeViewModel}" 
+                            Command="{Binding DeleteRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
                             CommandParameter="{Binding}" 
                             Margin="10,5"/>
                         <Button 
                             Text="Get Record" 
-                            Command="{Binding GetRecordCommand, Source={x:RelativeSource AncestorType={x:Type local:GaugeViewModel}}, x:DataType=local:GaugeViewModel}" 
+                            Command="{Binding GetRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
                             CommandParameter="{Binding}" 
                             Margin="10,5"/>
                         <Button 
                             Text="Get With A-Scans" 
-                            Command="{Binding GetRecordWithAScansCommand, Source={x:RelativeSource AncestorType={x:Type local:GaugeViewModel}}, x:DataType=local:GaugeViewModel}" 
+                            Command="{Binding GetRecordWithAScansCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
                             CommandParameter="{Binding}" 
                             Margin="10,5"/>
                         <HorizontalStackLayout
@@ -63,7 +63,7 @@
                             <ProgressBar Progress="{Binding PercentageTransferred}" WidthRequest="100" HeightRequest="10" VerticalOptions="Center"/>
                             <Button 
                                 Text="Cancel"
-                                Command="{Binding CancelRecordTransferCommand, Source={x:RelativeSource AncestorType={x:Type local:GaugeViewModel}}, x:DataType=local:GaugeViewModel}" 
+                                Command="{Binding CancelRecordTransferCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
                                 CommandParameter="{Binding}"
                                 Margin="10,5"/>
                         </HorizontalStackLayout>
@@ -80,7 +80,7 @@
             Grid.Row="4" ItemsSource="{Binding Path=Measurements}" SelectionMode="None"
             Background="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="{x:Type local:MeasurementViewModel}">
+                <DataTemplate x:DataType="{x:Type viewModels:MeasurementViewModel}">
                     <HorizontalStackLayout Padding="10, 2" VerticalOptions="Center" Spacing="10">
                         <Label Text="{Binding Name}" WidthRequest="80"/>
                         <Label Text="{Binding Thickness}" WidthRequest="80" HorizontalTextAlignment="End"/>

@@ -6,7 +6,7 @@ using System.Data;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Text;
-using static Cygnus.BLE.Protobuf.Constants;
+using static Cygnus.BLE.Interfaces.Constants;
 
 namespace Cygnus.BLE.VirtualGauge.ViewModels;
 
@@ -65,7 +65,7 @@ public partial class MainViewModel : ObservableObject
             {
                 cb.SetWrite(request =>
                 {
-                    var command = _protobufMessageConverter.FromZippedProtoBuf<Protobuf.V1.Command>(request.Data);
+                    var command = _protobufMessageConverter.FromZippedProtobuf<Protobuf.V1.Command>(request.Data);
                     _commandType = command.commandType;
                     Protobuf.V1.Message? message = new()
                     {
@@ -223,7 +223,7 @@ public partial class MainViewModel : ObservableObject
         );
 
         _notifyReadyCharacteristic = serviceBuilder.AddCharacteristic(
-            TMLinkMessageReadyCharacteristicId,
+            TMLinkNotifyMessageCharacteristicId,
             cb => cb.SetNotification(cs =>
             {
                 IGattCharacteristic push = cs.Characteristic;
