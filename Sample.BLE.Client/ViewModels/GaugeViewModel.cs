@@ -133,9 +133,9 @@ namespace Sample.BLE.Client.ViewModels
                             Measurements.Add(new()
                             {
                                 Name = measurement.Name,
-                                Thickness = _measurementConverter.GetDisplayedThickness(measurement.Thickness, measurement.Units),
+                                Thickness = _measurementConverter.GetDisplayedThickness(measurement.Thickness ?? 0, measurement.Units),
                                 Velocity = _measurementConverter.GetDisplayedVelocity(measurement.Velocity, measurement.Units),
-                                Timestamp = measurement.Timestamp
+                                Timestamp = measurement.Time
                             });
                         }
                     }
@@ -213,10 +213,10 @@ namespace Sample.BLE.Client.ViewModels
                 RecordList = recordList.Select(r => new RecordViewModel()
                 {
                     Key = r.Key,
-                    Name = r.Name,
+                    Name = r.RecordName,
                     RecordType = r.RecordType,
                     MeasurementCount = r.NumberOfPointsRequired,
-                    MeasurementsTaken = r.NumberOfPointsTaken,
+                    MeasurementsTaken = r.PointCount,
                     Created = r.Created,
                     Updated = r.Updated
                 });
@@ -270,16 +270,16 @@ namespace Sample.BLE.Client.ViewModels
                 BatteryLevel = liveMeasurement.BatteryLevel,
                 GaindB = liveMeasurement.GaindB,
                 Index = liveMeasurement.Index,
-                IsDeepcoat = liveMeasurement.IsDeepcoat,
+                IsDeepcoat = liveMeasurement.DeepCoatOn,
                 IsFrozen = liveMeasurement.IsFrozen,
-                IsStable = liveMeasurement.IsStable,
-                IsValid = liveMeasurement.IsValid,
+                IsStable = liveMeasurement.StableMeasurement,
+                IsValid = liveMeasurement.ValidMeasurement,
                 Mode = liveMeasurement.Mode,
-                SurfaceTemp = liveMeasurement.SurfaceTemp,
+                SurfaceTemp = liveMeasurement.SurfaceTemperatureCelsius,
                 Units = liveMeasurement.Units,
-                Thickness = _measurementConverter.GetDisplayedThickness(liveMeasurement.Thickness, liveMeasurement.Units),
+                Thickness = _measurementConverter.GetDisplayedThickness(liveMeasurement.Thickness ?? 0, liveMeasurement.Units),
                 Velocity = _measurementConverter.GetDisplayedVelocity(liveMeasurement.Velocity, liveMeasurement.Units),
-                HasAScan = liveMeasurement.AScan?.AScanPoints?.Length > 0,
+                HasAScan = liveMeasurement.AScan.Amplitudes?.Length > 0,
             };
         }
     }

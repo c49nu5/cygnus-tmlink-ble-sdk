@@ -7,7 +7,7 @@ namespace Sample.BLE.Client.ViewModels
         public string Name { get; internal set; } = string.Empty;
         public string? Thickness { get; internal set; }
         public string? Velocity { get; internal set; }
-        public DateTime? Timestamp { get; internal set; }
+        public DateTimeOffset? Timestamp { get; internal set; }
     }
 }
 

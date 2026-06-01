@@ -59,13 +59,13 @@ namespace Sample.BLE.Client.ViewModels
 
         public ObservableCollection<NewMeasurementViewModel> Measurements { get; set; } = [];
 
-        public RecordType Type => SelectedType == RecordType.Linear.ToString() ? RecordType.Linear : RecordType.Grid;
+        public RecordType Type => SelectedType == RecordType.Linear.ToString() ? RecordType.Linear : RecordType.Grid2D;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(Name))]
         public partial string? SelectedType { get; set; }
 
-        public IList<string> RecordTypes { get; } = [ RecordType.Linear.ToString(), RecordType.Grid.ToString() ];
+        public IList<string> RecordTypes { get; } = [ RecordType.Linear.ToString(), RecordType.Grid2D.ToString() ];
 
         public uint ColumnCount { get; set; } = 3;
         

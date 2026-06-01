@@ -18,7 +18,7 @@ namespace Sample.BLE.Client.ViewModels
         public partial double PercentageTransferred { get; set; }
 
         [ObservableProperty]
-        public partial TransferStatus Status { get; set; }
+        public partial FileTransferState Status { get; set; }
 
     }
 }

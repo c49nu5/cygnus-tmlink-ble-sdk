@@ -10,15 +10,15 @@ namespace Sample.BLE.Client.ViewModels
 
         public MeasurementUnits Units { get; set; }
 
-        public UTMode Mode { get; set; }
+        public MeasureMode Mode { get; set; }
 
         public uint BatteryLevel { get; set; }
 
-        public uint GaindB { get; set; }
+        public float GaindB { get; set; }
 
         public uint Index { get; set; }
 
-        public uint SurfaceTemp { get; set; }
+        public int SurfaceTemp { get; set; }
 
         public bool IsDeepcoat { get; set; }
 

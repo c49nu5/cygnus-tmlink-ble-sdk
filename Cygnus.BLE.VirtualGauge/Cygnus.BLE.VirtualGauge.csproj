@@ -96,7 +96,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Cygnus.BLE.Protobuf" Version="1.2.1" />
+		<PackageReference Include="Cygnus.BLE.Protobuf" Version="1.2.2" />
 	</ItemGroup>
 
 </Project>

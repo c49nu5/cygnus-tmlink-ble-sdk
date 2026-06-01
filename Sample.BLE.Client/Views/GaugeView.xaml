@@ -58,8 +58,8 @@
                             CommandParameter="{Binding}" 
                             Margin="10,5"/>
                         <HorizontalStackLayout
-                            IsVisible="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:TransferStatus.InProgress}}">
-                            <ActivityIndicator IsRunning="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:TransferStatus.InProgress}}" Margin="8"/>
+                            IsVisible="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:FileTransferState.Receiving}}">
+                            <ActivityIndicator IsRunning="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:FileTransferState.Receiving}}" Margin="8"/>
                             <ProgressBar Progress="{Binding PercentageTransferred}" WidthRequest="100" HeightRequest="10" VerticalOptions="Center"/>
                             <Button 
                                 Text="Cancel"
