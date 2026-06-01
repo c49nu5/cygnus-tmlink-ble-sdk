@@ -1,6 +1,12 @@
 # cygnus-tmlink-ble-sdk
 A SDK for the Cygnus TM-Link BLE (Bluetooth Low Energy) Service.
 
+## Cygnus Instruments Limited
+**Cygnus Instruments** are a manufacturer of industrial Ultrasonic Thickness Gauges (UTGs) which are used for measuring the thickness of materials such as metals, plastics and composites.
+[Cygnus Website](https://cygnus-instruments.com/)
+
+The **Cygnus 1 Ex** is an Instrinsically Safe UTG certified for ATEX and IECEx.
+
 ## TM-Link Overview
 * *'TM-Link' = Thickness Measurement data Link.* *
 
