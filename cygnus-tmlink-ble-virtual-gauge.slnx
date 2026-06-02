@@ -4,6 +4,7 @@
     <File Path="Protos/cyg_tml_api_v1.proto" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="Cygnus.TMLink.API.Maui/Cygnus.TMLink.API.Maui.csproj" />
-  <Project Path="Sample.TMLink.Client/Sample.TMLink.Client.csproj" />
+  <Project Path="Cygnus.TMLink.BLE.VirtualGauge/Cygnus.TMLink.BLE.VirtualGauge.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
 </Solution>

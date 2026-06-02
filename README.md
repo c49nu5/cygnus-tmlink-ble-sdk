@@ -1,5 +1,5 @@
 # cygnus-tmlink-ble-sdk
-A SDK for the Cygnus TM-Link BLE (Bluetooth Low Energy) Service.
+An SDK for the Cygnus TM-Link BLE (Bluetooth Low Energy) Service.
 
 ## Cygnus Instruments Limited
 **Cygnus Instruments** are a manufacturer of industrial Ultrasonic Thickness Gauges (UTGs) which are used for measuring the thickness of materials such as metals, plastics and composites.
@@ -29,7 +29,7 @@ A typical workflow using TM-Link with a mobile device with an Inspection Applica
 
 [The Cygnus 1 Ex Gauge](https://cygnus-instruments.com/product/cygnus-1-ex/)
 
-## TM-Link over BLE
+## TM-Link via BLE
 The latest Cygnus 1Ex gauge firmware (from V1.4.xx) supports the TM-Link via BLE communication mode. This allows you to connect to the gauge using a smartphone or computer and read data from it in real-time.
 
 If you want to use the latest Cygnus 1Ex firmware and firmware update utilities please contact <service@cygnus-instruments.com>
@@ -39,9 +39,9 @@ The characteristics of the BLE TM-Link Service allow writing commands, receiving
 There is a .Net API available for the TM-Link BLE Service, which can be found here [tmlink-dotnet-api](https://github.com/c49nu5/tmlink-dotnet-api)
 
 ## SDK main components:
-- The sample TypeScript app for accessing the TM-Link BLE Service.
-- The Sample.BLE.Client Maui application that demonstrates how to use the TM-Link .Net API.
-- The Cygnus.BLE.VirtualGauge Maui application that that will simulate a Cygnus 1Ex gauge by hosting the TM-Link BLE Service on a mobile phone, this is useful for testing the TM-Link client apps without needing a physical gauge.
+- The sample TypeScript app for accessing the TM-Link BLE Service using Web-Bluetooth.
+- The Sample.TMLink.Client Maui application that demonstrates how to use the TM-Link .Net API.
+- The Cygnus.TMLink.VirtualGauge Maui application that that will simulate a Cygnus 1Ex gauge by hosting the TM-Link BLE Service on a mobile phone, this is useful for testing the TM-Link client apps without needing a physical gauge.
 
 ### Sample TypeScript app
 This sample app is a good starting point if you want to build a web application that connects to the TM-Link BLE Service.
@@ -50,7 +50,7 @@ The code in the app can run in any browser that supports [Web-Bluetooth](https:/
 
 Ensure Node is installed, open this repository in Visual Studio Code, then run the Launch Chrome or Launch Edge configuration, this will install the dependencies, compile the typescript and and run the node app using Vite.
 
-The TypeScript code is located in the `Sample.BLE.TypeScript\src` folder. The app is loaded by `src\main.ts` but the majority of the logic for connecting to the TM-Link BLE Service and handling the communication is in `src\cygnus-1ex-ble.ts` file.
+The TypeScript code is located in the `Sample.TMLink.TypeScript\src` folder. The app is loaded by `src\main.ts` but the majority of the logic for connecting to the TM-Link BLE Service and handling the communication is in `src\cygnus-1ex-ble.ts` file.
 
 This file imports types from `src/Protos/cyg_tml_api_v1.ts` which was generated from the `cyg_tml_api_v1.proto` definition file. The `cyg_tml_api_v1.proto` file is located in the `Protos` folder and is the same protobuf definition used in the .Net API, and in the Cygnus 1Ex gauge firmware.
 
@@ -66,21 +66,21 @@ The first 4 methods in `cygnus-1ex-ble.ts` are the main ones that demonstrate ho
 - deserializeMessage, converts a g-zipped byte array received from the TM-Link BLE Service to a protobuf instance; this can be a Message in response to Command sent from characteristic `de670904-8025-4c69-a40e-eccd60563713` or a FrozenLiveMeasurement from `de670907-8025-4c69-a40e-eccd60563713`.
 - deserializeNotifyLiveMeasurement, converts a byte array received from the live measurement characteristic `de670906-8025-4c69-a40e-eccd60563713` to a protobuf LiveMeasurement instance.
 
-### Sample.BLE.Client Maui application
-Open the `cygnus-tmlink-ble-dotnet-sample.slnx` solution file in Visual Studio, set the `Sample.BLE.Client` project as the startup project and run it. 
+### Sample.TMLink.Client Maui application
+Open the `cygnus-tmlink-ble-dotnet-sample.slnx` solution file in Visual Studio, set the `Sample.TMLink.Client` project as the startup project and run it. 
 
 The app will scan for nearby TM-Link BLE Services, you should see your Cygnus 1Ex gauge in the list if it's in range and has Bluetooth enabled. Select the gauge and connect to it, then you can send commands to the gauge and receive responses, as well as view live measurements.
 
-It uses the [TM-Link .Net API](https://github.com/c49nu5/tmlink-dotnet-api) to handle the communication with the TM-Link BLE Service, so you can refer to the code in the `Sample.BLE.Client` project to see how to use the API in a real application.
+It uses the [TM-Link .Net API](https://github.com/c49nu5/tmlink-dotnet-api) to handle the communication with the TM-Link BLE Service, so you can refer to the code in the `Sample.TMLink.Client` project to see how to use the API in a real application.
 Note that it can be run on Windows, Android, MacOS or iOS, but the BLE functionality has not been tested on iOS.
 
 Make sure to have Bluetooth enabled on your device and a Cygnus 1Ex gauge with communication mode configured as TM-Link via BLE.
 
-### Cygnus.BLE.VirtualGauge Maui application
-Open the `cygnus-tmlink-ble-dotnet-virtual-gauge.slnx` solution file in Visual Studio and run it on a mobile device with Bluetooth capabilities.
+### Cygnus.TMLink.BLE.VirtualGauge Maui application
+Open the `cygnus-tmlink-ble-virtual-gauge.slnx` solution file in Visual Studio and run it on a mobile device with Bluetooth capabilities.
 The app has been tested on Android, but it should also work on iOS. 
 
-Once the app is running, it will host the TM-Link BLE Service and simulate a Cygnus 1Ex gauge. You can then connect to it using the Sample.BLE.Client application or any other TM-Link client.
+Once the app is running, it will host the TM-Link BLE Service and simulate a Cygnus 1Ex gauge. You can then connect to it using the Sample.TMLink.Client application or any other TM-Link client.
 
 ## Bluetooth Information
 To enable TM-Link Bluetooth services on the Cygnus 1Ex gauge, from the Setup menu, set Comms Mode to **TM-Link**.
@@ -116,7 +116,7 @@ The CHARACTERISTIC_MODEL_NUMBER_STRING will return one of the following dependin
 
 The CHARACTERISTIC_FIRMWARE_REVISION_STRING will return the gauge firmware version in this format "Major.Minor.Build"
 
-The CHARACTERISTIC_SOFTWARE_REVISION_STRING will return the proto message file version string, this can be used to handle different proto files should the interface be extended in the future. This version will match the package version in the proto file, for example 'package Cygnus.BLE.Protobuf.V1;' will return string '1'.
+The CHARACTERISTIC_SOFTWARE_REVISION_STRING will return the proto message file version string, this can be used to handle different proto files should the interface be extended in the future. This version will match the package version in the proto file, for example 'package Cygnus.TMLink.Protobuf.V1;' will return string '1'.
 
 
 

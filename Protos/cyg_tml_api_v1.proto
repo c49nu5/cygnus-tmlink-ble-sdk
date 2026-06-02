@@ -1,5 +1,9 @@
-syntax = "proto3";                            
-package Cygnus.BLE.Protobuf.V1;    
+syntax = "proto3";
+package Cygnus.V1;
+
+/** C# namespace for generated classes. */
+option csharp_namespace = "Cygnus.TMLink.Protobuf.V1";
+
 import "google/protobuf/timestamp.proto";
 
 // =====================================================================================================

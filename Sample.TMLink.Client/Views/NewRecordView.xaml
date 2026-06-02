@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               x:Class="Sample.TMLink.Client.Views.NewRecordView"
+               xmlns:viewModels="clr-namespace:Sample.TMLink.Client.ViewModels"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:DataType="viewModels:NewRecordViewModel"
+               Margin="0"               
+               Padding="0">
+    <Grid
+        Margin="20"
+        RowDefinitions="Auto,Auto,Auto,Auto">
+        <HorizontalStackLayout>
+            <Label
+                Margin="10"
+                Text="Record Type"/>
+            <Picker
+                SelectedItem="{Binding SelectedType}"
+                ItemsSource="{Binding RecordTypes}"/>
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            Grid.Row="1">
+            <Label
+                Margin="10"
+                Text="New Record Name"/>
+            <Label
+                Margin="10"
+                Text="{Binding Name}"/>
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Grid}"
+            Grid.Row="2">
+            <Label
+                Margin="10"
+                Text="Rows"/>
+            <Entry
+                Text="{Binding RowCount, Mode=TwoWay}"/>
+            <Label
+                Margin="10"
+                Text="Cols"/>
+            <Entry
+                Text="{Binding ColumnCount, Mode=TwoWay}"/>
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Linear}"
+            Grid.Row="2">
+            <Label
+                Margin="10"
+                Text="Measurement Count"/>
+            <Entry
+                Text="{Binding ColumnCount, Mode=TwoWay}"/>
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            Grid.Row="3"
+                HorizontalOptions="End">
+            <Button
+                    Margin="10"
+                    Text="OK"
+                    Command="{Binding OKCommand}"/>
+            <Button
+                    Margin="10"
+                    Text="Cancel"
+                    Command="{Binding CancelCommand}"/>
+        </HorizontalStackLayout>
+    </Grid>
+</toolkit:Popup>
