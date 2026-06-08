@@ -269,7 +269,7 @@ namespace Sample.TMLink.Client.ViewModels
             {
                 BatteryLevel = liveMeasurement.BatteryLevel,
                 GaindB = liveMeasurement.GaindB,
-                Index = liveMeasurement.Index,
+                Index = liveMeasurement.PointIndex,
                 IsDeepcoat = liveMeasurement.DeepCoatOn,
                 IsFrozen = liveMeasurement.IsFrozen,
                 IsStable = liveMeasurement.StableMeasurement,

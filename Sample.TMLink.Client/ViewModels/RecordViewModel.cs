@@ -4,7 +4,7 @@ using Cygnus.Models;
 
 namespace Sample.TMLink.Client.ViewModels
 {
-    public partial class RecordViewModel : ObservableObject, ITransferRequest, IDeleteRequest
+    public partial class RecordViewModel : ObservableObject, IFileTransferRequest
     {
         public string Key { get; internal set; } = string.Empty;
         public string Name { get; internal set; } = string.Empty;
