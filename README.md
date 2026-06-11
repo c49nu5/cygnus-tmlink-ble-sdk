@@ -72,7 +72,7 @@ Open the `cygnus-tmlink-ble-dotnet-sample.slnx` solution file in Visual Studio, 
 The app will scan for nearby TM-Link BLE Services, you should see your Cygnus 1Ex gauge in the list if it's in range and has Bluetooth enabled. Select the gauge and connect to it, then you can send commands to the gauge and receive responses, as well as view live measurements.
 
 It uses the [TM-Link .Net API](https://github.com/c49nu5/tmlink-dotnet-api) to handle the communication with the TM-Link BLE Service, so you can refer to the code in the `Sample.TMLink.Client` project to see how to use the API in a real application.
-Note that it can be run on Windows, Android, MacOS or iOS, but the BLE functionality has not been tested on iOS.
+Note that it can be run on Windows, Android, MacOS or iOS.
 
 Make sure to have Bluetooth enabled on your device and a Cygnus 1Ex gauge with communication mode configured as TM-Link via BLE.
 
