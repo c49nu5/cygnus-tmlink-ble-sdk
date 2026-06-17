@@ -29,11 +29,12 @@ A typical workflow using TM-Link with a mobile device with an Inspection Applica
 
 [The Cygnus 1 Ex Gauge](https://cygnus-instruments.com/product/cygnus-1-ex/)
 
-## TM-Link via BLE
+## C1Ex Gauge Firmware
 The latest Cygnus 1Ex gauge firmware (from V1.4.xx) supports the TM-Link via BLE communication mode. This allows you to connect to the gauge using a smartphone or computer and read data from it in real-time.
 
 If you want to use the latest Cygnus 1Ex firmware and firmware update utilities please contact <service@cygnus-instruments.com>
 
+## TM-Link via BLE
 The characteristics of the BLE TM-Link Service allow writing commands, receiving notifications and reading responses which contain g-zipped, protobuf messages.  The protobuf messages are defined in the [cyg_tml_api_v1.proto](https://github.com/c49nu5/tmlink-dotnet-api/blob/master/Protos/cyg_tml_api_v1.proto) file, along with a description of the process for using them.
 
 There is a .Net API available for the TM-Link BLE Service, which can be found here [tmlink-dotnet-api](https://github.com/c49nu5/tmlink-dotnet-api)
