@@ -7,17 +7,31 @@
                x:DataType="viewModels:NewRecordViewModel"
                Margin="0"               
                Padding="0">
+    <ContentView.Resources>
+        <Style TargetType="Label">
+            <Setter Property="TextColor" Value="Black"/>
+        </Style>
+        <Style TargetType="Picker">
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="TextColor" Value="Black"/>
+        </Style>
+        <Style TargetType="Entry">
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="TextColor" Value="Black"/>
+        </Style>
+    </ContentView.Resources>
     <Grid
         Margin="20"
         RowDefinitions="Auto,Auto,Auto,Auto">
-        <HorizontalStackLayout>
+        <Grid ColumnDefinitions="Auto,*">
             <Label
                 Margin="10"
                 Text="Record Type"/>
             <Picker
+                Grid.Column="1"
                 SelectedItem="{Binding SelectedType}"
                 ItemsSource="{Binding RecordTypes}"/>
-        </HorizontalStackLayout>
+        </Grid>
         <HorizontalStackLayout
             Grid.Row="1">
             <Label
@@ -27,29 +41,35 @@
                 Margin="10"
                 Text="{Binding Name}"/>
         </HorizontalStackLayout>
-        <HorizontalStackLayout
-            IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Grid}"
+        <Grid ColumnDefinitions="60,*,60,*"
+            IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Grid2D}"
             Grid.Row="2">
             <Label
+                Grid.Column="0"
                 Margin="10"
                 Text="Rows"/>
             <Entry
+                Grid.Column="1"
                 Text="{Binding RowCount, Mode=TwoWay}"/>
             <Label
+                Grid.Column="2"
                 Margin="10"
                 Text="Cols"/>
             <Entry
+                Grid.Column="3"
                 Text="{Binding ColumnCount, Mode=TwoWay}"/>
-        </HorizontalStackLayout>
-        <HorizontalStackLayout
+        </Grid>
+        <Grid
+            ColumnDefinitions="180,*"
             IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Linear}"
             Grid.Row="2">
             <Label
                 Margin="10"
                 Text="Measurement Count"/>
             <Entry
+                Grid.Column="1"
                 Text="{Binding ColumnCount, Mode=TwoWay}"/>
-        </HorizontalStackLayout>
+        </Grid>
         <HorizontalStackLayout
             Grid.Row="3"
                 HorizontalOptions="End">

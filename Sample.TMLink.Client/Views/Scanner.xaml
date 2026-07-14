@@ -44,22 +44,26 @@
             Background="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="{x:Type viewModels:GaugeViewModel}">
-                    <HorizontalStackLayout Padding="10, 0">
-                        <VerticalStackLayout  VerticalOptions="Center">
-                            <HorizontalStackLayout Spacing="10">
-                                <Label Text="{Binding Name}" WidthRequest="140"/>
-                                <Label Text="{Binding Model}" WidthRequest="80"/>
-                                <Label Text="{Binding SerialNumber}" WidthRequest="70"/>
-                                <Label Text="{Binding FirmwareVersion}" WidthRequest="70"/>
-                            </HorizontalStackLayout>
-                        </VerticalStackLayout>
-                        <Button 
-                            Text="Connect" 
-                            Command="{Binding ConnectCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:ScannerViewModel}}, x:DataType=viewModels:ScannerViewModel}" 
-                            CommandParameter="{Binding}" 
-                            IsVisible="{Binding IsConnected, Converter={toolkit:InvertedBoolConverter}}"
-                            Margin="10"/>
-                    </HorizontalStackLayout>
+                    <Grid  VerticalOptions="Center" Padding="10,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.4*" />
+                            <ColumnDefinition Width="0.2*" />
+                            <ColumnDefinition Width="0.15*" />
+                            <ColumnDefinition Width="0.15*" />
+                            <ColumnDefinition Width="0.3*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Text="{Binding Name}" VerticalTextAlignment="Center" LineBreakMode="TailTruncation"/>
+                        <Label Grid.Column="1" Text="{Binding Model}" VerticalTextAlignment="Center"/>
+                        <Label Grid.Column="2" Text="{Binding SerialNumber}" VerticalTextAlignment="Center"/>
+                        <Label Grid.Column="3" Text="{Binding FirmwareVersion}" VerticalTextAlignment="Center"/>
+                        <Button Padding="-5"
+                                Text="Connect" 
+                                Grid.Column="4"
+                                Command="{Binding ConnectCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:ScannerViewModel}}, x:DataType=viewModels:ScannerViewModel}" 
+                                CommandParameter="{Binding}" 
+                                IsVisible="{Binding IsConnected, Converter={toolkit:InvertedBoolConverter}}"
+                                Margin="10"/>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

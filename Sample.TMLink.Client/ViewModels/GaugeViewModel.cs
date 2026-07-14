@@ -54,7 +54,7 @@ namespace Sample.TMLink.Client.ViewModels
             var popupResult = await _popupService.ShowPopupAsync<NewRecordViewModel>(page) as IPopupResult<NewRecordViewModel>;
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                if (popupResult?.Result is NewRecordViewModel newRecord && newRecord != null)
+                if (popupResult?.Result is NewRecordViewModel newRecord && newRecord != null && !popupResult.WasDismissedByTappingOutsideOfPopup)
                 {
                     BlankRecord blankRecord = new()
                     {

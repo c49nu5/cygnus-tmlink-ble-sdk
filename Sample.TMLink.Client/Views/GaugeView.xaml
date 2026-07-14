@@ -31,43 +31,64 @@
             FontSize="20"/>
         <CollectionView
             x:Name="RecordList"
-            Grid.Row="2" ItemsSource="{Binding Path=RecordList}" SelectionMode="Single"
+            Grid.Row="2" 
+            ItemsSource="{Binding Path=RecordList}" 
+            SelectionMode="Single"
             Background="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="{x:Type viewModels:RecordViewModel}">
-                    <HorizontalStackLayout Padding="10,0" Spacing="5">
-                        <VerticalStackLayout VerticalOptions="Center">
-                            <Label Text="{Binding Name}" WidthRequest="150"/>
-                        </VerticalStackLayout>
-                        <Label Text="{Binding MeasurementCount}" WidthRequest="50" VerticalOptions="Center"/>
-                        <Label Text="{Binding MeasurementsTaken}" WidthRequest="50" VerticalOptions="Center"/>
-                        <Label Text="{Binding Created}" WidthRequest="160" VerticalOptions="Center"/>
-                        <Button 
-                            Text="X" 
-                            Command="{Binding DeleteRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
-                            CommandParameter="{Binding}" 
-                            Margin="10,5"/>
-                        <Button 
-                            Text="Get Record" 
-                            Command="{Binding GetRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
-                            CommandParameter="{Binding}" 
-                            Margin="10,5"/>
-                        <Button 
-                            Text="Get With A-Scans" 
-                            Command="{Binding GetRecordWithAScansCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
-                            CommandParameter="{Binding}" 
-                            Margin="10,5"/>
-                        <HorizontalStackLayout
-                            IsVisible="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:FileTransferState.Receiving}}">
-                            <ActivityIndicator IsRunning="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:FileTransferState.Receiving}}" Margin="8"/>
-                            <ProgressBar Progress="{Binding PercentageTransferred}" WidthRequest="100" HeightRequest="10" VerticalOptions="Center"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.2*" />
+                            <ColumnDefinition Width="0.1*" />
+                            <ColumnDefinition Width="0.1*" />
+                            <ColumnDefinition Width="0.15*" />
+                            <ColumnDefinition Width="0.5*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Text="{Binding Name}" Padding="10,0" MaxLines="1" LineBreakMode="TailTruncation" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="{Binding MeasurementCount}" VerticalOptions="Center"/>
+                        <Label Grid.Column="2" Text="{Binding MeasurementsTaken}" VerticalOptions="Center"/>
+                        <Label Grid.Column="3" Text="{Binding Created}" VerticalOptions="Center"/>
+                        <FlexLayout 
+                            Grid.Column="4" 
+                            VerticalOptions="Center"
+                            AlignItems="Center" 
+                            JustifyContent="Center"
+                            Wrap="Wrap">
+                            <Button
+                                Text="X"
+                                Command="{Binding DeleteRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                                CommandParameter="{Binding}" 
+                                Margin="5"/>
                             <Button 
-                                Text="Cancel"
-                                Command="{Binding CancelRecordTransferCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
-                                CommandParameter="{Binding}"
-                                Margin="10,5"/>
-                        </HorizontalStackLayout>
-                    </HorizontalStackLayout>
+                                Text="Get Record" 
+                                Command="{Binding GetRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                                CommandParameter="{Binding}" 
+                                Margin="5"/>
+                            <Button 
+                                Text="Get With A-Scans" 
+                                Command="{Binding GetRecordWithAScansCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                                CommandParameter="{Binding}" 
+                                Margin="5" 
+                                LineBreakMode="CharacterWrap"/>
+                            <HorizontalStackLayout
+                                IsVisible="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:FileTransferState.Receiving}}">
+                                <ActivityIndicator IsRunning="{Binding Status, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:FileTransferState.Receiving}}" Margin="8"/>
+                                <ProgressBar Progress="{Binding PercentageTransferred}" WidthRequest="100" HeightRequest="10" VerticalOptions="Center"/>
+                                <Button 
+                                    Text="Cancel"
+                                    Command="{Binding CancelRecordTransferCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                                    CommandParameter="{Binding}"
+                                    Margin="5"/>
+                            </HorizontalStackLayout>
+                        </FlexLayout>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
@@ -77,16 +98,24 @@
             FontSize="20"/>
         <CollectionView
             x:Name="MeasurementsList"
-            Grid.Row="4" ItemsSource="{Binding Path=Measurements}" SelectionMode="None"
+            Grid.Row="4" 
+            ItemsSource="{Binding Path=Measurements}" 
+            SelectionMode="None"
             Background="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="{x:Type viewModels:MeasurementViewModel}">
-                    <HorizontalStackLayout Padding="10, 2" VerticalOptions="Center" Spacing="10">
-                        <Label Text="{Binding Name}" WidthRequest="80"/>
-                        <Label Text="{Binding Thickness}" WidthRequest="80" HorizontalTextAlignment="End"/>
-                        <Label Text="{Binding Velocity}" WidthRequest="80" HorizontalTextAlignment="End"/>
-                        <Label Text="{Binding Timestamp}"/>
-                    </HorizontalStackLayout>
+                    <Grid VerticalOptions="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.2*" />
+                            <ColumnDefinition Width="0.2*" />
+                            <ColumnDefinition Width="0.3*" />
+                            <ColumnDefinition Width="0.3*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Padding="15,0,0,0" Grid.Column="0" Text="{Binding Name}"/>
+                        <Label Grid.Column="1" Text="{Binding Thickness}" HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="2" Text="{Binding Velocity}" HorizontalTextAlignment="Center"/>
+                        <Label Grid.Column="3" Text="{Binding Timestamp}"/>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
