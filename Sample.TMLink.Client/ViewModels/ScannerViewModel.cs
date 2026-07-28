@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Cygnus.TMLink.API.Interfaces;
-using Cygnus.TMLink.Interfaces;
 using Cygnus.Interfaces;
 using Cygnus.Models;
 using Microsoft.Extensions.Logging;
@@ -11,18 +9,18 @@ using System.Windows.Input;
 
 namespace Sample.TMLink.Client.ViewModels
 {
-    public partial class ScannerViewModel : ObservableObject, IConnectionMonitor
+    public partial class ScannerViewModel : ObservableObject, IConnectionObserver
     {
         private readonly ILogger<ScannerViewModel> _logger;
         private readonly IConnectionService _connectionService;
         private readonly IMeasurementDisplaySettingsService _measurementSettingsService;
-        private readonly Func<GaugeViewModel> _gaugeViewFactory;
+        private readonly Func<IConnectionInformation, GaugeViewModel> _gaugeViewFactory;
 
         public ScannerViewModel(
             ILogger<ScannerViewModel> logger,
             IConnectionService connectionService,
             IMeasurementDisplaySettingsService measurementSettingsService,
-            Func<GaugeViewModel> gaugeViewFactory)
+            Func<IConnectionInformation,GaugeViewModel> gaugeViewFactory)
         {
             ConnectCommand = new RelayCommand<GaugeViewModel?>(Connect);
             ToggleScanning = new RelayCommand(ToggleScanForGauges);
@@ -45,12 +43,11 @@ namespace Sample.TMLink.Client.ViewModels
         [NotifyPropertyChangedFor(nameof(Waiting))]
         [NotifyPropertyChangedFor(nameof(ScanState))]
         [NotifyPropertyChangedFor(nameof(ToggleScanningCmdLabelText))]
-        public partial bool IsScanning { get; set; } = false;
+        public partial ConnectionState ConnectionState { get; set; }
 
-        public string StateText => "";// GetStateText();
-        public bool Waiting => !IsScanning;
-        public string ScanState => IsScanning ? "Scanning" : "Waiting";
-        public string ToggleScanningCmdLabelText => IsScanning ? "Cancel" : "Start Scan";
+        public bool Waiting => ConnectionState == ConnectionState.Connecting;
+        public string ScanState => ConnectionState == ConnectionState.Connecting ? "Scanning" : "Waiting";
+        public string ToggleScanningCmdLabelText => ConnectionState == ConnectionState.Connecting ? "Cancel" : "Start Scan";
 
         private void DebugMessage(string message)
         {
@@ -63,7 +60,7 @@ namespace Sample.TMLink.Client.ViewModels
 
         private void ToggleScanForGauges()
         {
-            if (!IsScanning)
+            if (ConnectionState != ConnectionState.Connecting)
             {
                 DebugMessage($"Starting Scan");
                 Dispatcher.GetForCurrentThread()?.DispatchAsync(async () =>
@@ -76,7 +73,7 @@ namespace Sample.TMLink.Client.ViewModels
             {
                 DebugMessage($"Canceling Scanning");
                 _connectionService.CancelDiscover();
-                IsScanning = false;
+                ConnectionState = ConnectionState.Disconnected;
             }
         }
 
@@ -84,9 +81,9 @@ namespace Sample.TMLink.Client.ViewModels
 
         private void Connect(GaugeViewModel? value)
         {
-            if (value != null)
+            if (value?.Connection != null)
             {
-                _connectionService.ConnectToGauge(value.Gauge);
+                _connectionService.ConnectToGauge(value.Connection);
                 OnPropertyChanged(nameof(Gauges));
             }
         }
@@ -117,9 +114,11 @@ namespace Sample.TMLink.Client.ViewModels
             return _measurementSettingsService.Resolution != Resolution;
         }
 
-        public void GaugeConnected(ITMLinkGauge? gauge)
+        public void GaugeConnected(IGauge? gauge)
         {
-            SelectedGauge = Gauges.FirstOrDefault(g => g.SerialNumber == gauge?.SerialNumber);
+            var gaugeViewModel = Gauges.FirstOrDefault(g => g.SerialNumber == gauge?.SerialNumber);
+            gaugeViewModel?.Gauge = gauge;
+            SelectedGauge = gaugeViewModel;
         }
 
         partial void OnSelectedGaugeChanged(GaugeViewModel? oldValue, GaugeViewModel? newValue)
@@ -128,20 +127,24 @@ namespace Sample.TMLink.Client.ViewModels
             newValue?.RefreshRecordList();
         }
 
-        public void GaugeDiscovered(ITMLinkGauge gauge)
+        public void GaugeDiscovered(IConnectionInformation connection)
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                GaugeViewModel? gaugeViewModel = Gauges.FirstOrDefault(g => g.SerialNumber == gauge.SerialNumber);
+                GaugeViewModel? gaugeViewModel = Gauges.FirstOrDefault(g => g.SerialNumber == connection.SerialNumber);
                 if (gaugeViewModel != null)
                 {
                     Gauges.Remove(gaugeViewModel);
                 }
 
-                gaugeViewModel = _gaugeViewFactory();
-                gaugeViewModel.Gauge = gauge;
+                gaugeViewModel = _gaugeViewFactory(connection);
                 Gauges.Add(gaugeViewModel);
             });
+        }
+
+        public void AddConnectionMessage(string message)
+        {
+            _logger.LogInformation(message);
         }
         #endregion Scan & Discover
     }

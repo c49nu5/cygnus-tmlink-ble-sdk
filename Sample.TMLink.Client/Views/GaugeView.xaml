@@ -17,12 +17,14 @@
             <Label Text="Live feed" VerticalOptions="Center" 
                    Margin="20,0,0,0"/>
             <Switch IsToggled="{Binding IsSubscribedToLive, Mode=TwoWay}" Margin="5,0"/>
-            <Label Text="{Binding LiveMeasurement.Index}" VerticalOptions="Center" />
-            <Label Text="{Binding LiveMeasurement.Mode}" VerticalOptions="Center" />
-            <Label Text="{Binding LiveMeasurement.Thickness}" HorizontalTextAlignment="End" VerticalOptions="Center" />
-            <Label Text="{Binding LiveMeasurement.Velocity}" HorizontalTextAlignment="End" VerticalOptions="Center" />
-            <Label Text="{Binding LiveMeasurement.IsStable, Converter={toolkit:BoolToObjectConverter TrueObject='Stable', FalseObject='Unstable'}}" VerticalOptions="Center" />
-            <Label IsVisible="{Binding LiveMeasurement.HasAScan, FallbackValue=false, TargetNullValue=false}" Text="Has AScan" VerticalOptions="Center"/>
+            <HorizontalStackLayout IsVisible="{Binding IsSubscribedToLive}" VerticalOptions="Center" Spacing="10">
+                <Label Text="{Binding LiveMeasurement.Index}" />
+                <Label Text="{Binding LiveMeasurement.Mode}" />
+                <Label Text="{Binding LiveMeasurement.Thickness}" HorizontalTextAlignment="End" />
+                <Label Text="{Binding LiveMeasurement.Velocity}" HorizontalTextAlignment="End" />
+                <Label Text="{Binding LiveMeasurement.IsStable, Converter={toolkit:BoolToObjectConverter TrueObject='Stable', FalseObject='Unstable'}}" />
+                <Label IsVisible="{Binding LiveMeasurement.HasAScan, FallbackValue=false, TargetNullValue=false}" Text="Has AScan" />
+            </HorizontalStackLayout>
         </HorizontalStackLayout>
 
         <Label 

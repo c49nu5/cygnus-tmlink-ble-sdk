@@ -400,7 +400,7 @@ public partial class MainViewModel : ObservableObject
 
                 await _hostingManager.StartAdvertising(new AdvertisementOptions
                 {
-                    LocalName = LocalName,                    
+                    LocalName = LocalName,
                     ServiceUuids = [TMLinkServiceId, DeviceInformationServiceId]
                 });
             } 

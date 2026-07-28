@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Cygnus.TMLink.API.Maui;
 
-public class TMLinkPlatformService : IPlatformService
+public class TMLinkPlatformService : IPlatformService, IUserDialogService
 {
     protected readonly ILogger<TMLinkPlatformService> _logger;
 

@@ -40,7 +40,7 @@
                 <!-- Notify message ready characteristic -->
                 <StackLayout>
                     <Label Text="Notify message ready characteristic" FontAttributes="Bold" />
-                    <Label Text="{x:Static const:Constants.TMLinkMessageReadyCharacteristicId}" TextColor="Green" />
+                    <Label Text="{x:Static const:Constants.TMLinkNotifyMessageCharacteristicId}" TextColor="Green" />
                     <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto" ColumnSpacing="8">
                         <Label Grid.Row="0" Text="Subscribers" />
                         <Label Grid.Row="0" Grid.Column="1" Text="{Binding Subscribers}" />

@@ -2,34 +2,36 @@
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Cygnus.TMLink.API.Interfaces;
-using Cygnus.TMLink.Interfaces;
 using Cygnus.Interfaces;
 using Cygnus.Models;
+using Cygnus.TMLink.API.Maui;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Windows.Input;
 
 namespace Sample.TMLink.Client.ViewModels
 {
-    public partial class GaugeViewModel : ObservableObject, ITMLinkGaugeMonitor
+    public partial class GaugeViewModel : ObservableObject, IGaugeObserver
     {
         private readonly ILogger<GaugeViewModel> _logger;
         private readonly IPopupService _popupService;
-        private readonly IPlatformService _platformService;
+        private readonly IUserDialogService _userDialogService;
         private readonly IMeasurementConverter _measurementConverter;
 
         public GaugeViewModel(
             ILogger<GaugeViewModel> logger,
             IPopupService popupService,
-            IPlatformService platformService,
-            IMeasurementConverter measurementConverter)
+            IUserDialogService userDialogService,
+            IMeasurementConverter measurementConverter,
+            IConnectionInformation connectionInformation)
         {
             _logger = logger;
             _popupService = popupService;
-            _platformService = platformService;
+            _userDialogService = userDialogService;
             _measurementConverter = measurementConverter;
+            Connection = connectionInformation;
             GetRecordCommand = new RelayCommand<RecordViewModel>(r => GetRecord(r, false));
             GetRecordWithAScansCommand = new RelayCommand<RecordViewModel>(r => GetRecord(r, true));
             CancelRecordTransferCommand = new AsyncRelayCommand(CanceRecordlTransfer);
@@ -46,7 +48,7 @@ namespace Sample.TMLink.Client.ViewModels
         private async Task NewRecord()
         {
             Page? page = App.Current?.Windows[0].Page;
-            if (page == null)
+            if (page == null || Gauge == null)
             {
                 return;
             }
@@ -84,8 +86,35 @@ namespace Sample.TMLink.Client.ViewModels
             });
         }
 
-        [ObservableProperty]
-        public required partial ITMLinkGauge Gauge { get; set; }
+        internal IConnectionInformation Connection
+        {
+            get => field;
+            set
+            {
+                field = value;
+                Gauge = value as IGauge; // NB for TM-Link, the connection information is also the gauge itself
+            }
+        }
+
+        internal IGauge? Gauge
+        {
+            get => field;
+            set
+            {
+                if (field != value)
+                {
+                    field = value;
+                    if (value != null)
+                    {
+                        Name = value.Name;
+                        Model = value.Model;
+                        SerialNumber = value.SerialNumber;
+                        FirmwareVersion = value.FirmwareVersion;
+                        value.AddObserver(this);
+                    }
+                }
+            }
+        }
 
         [ObservableProperty]
         public partial bool IsConnected { get; set; }
@@ -100,7 +129,7 @@ namespace Sample.TMLink.Client.ViewModels
         public partial string Model { get; set; } = string.Empty;
     
         [ObservableProperty]
-        public partial string SerialNumber { get; set; } = string.Empty;
+        public partial uint? SerialNumber { get; set; } = null;
 
         [ObservableProperty]
         public partial Version? FirmwareVersion { get; set; }
@@ -118,7 +147,7 @@ namespace Sample.TMLink.Client.ViewModels
         {
             MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                if (record?.Name != null)
+                if (record?.Name != null && Gauge != null)
                 {
                     Stopwatch stopwatch = new Stopwatch();
                     stopwatch.Start();
@@ -147,7 +176,7 @@ namespace Sample.TMLink.Client.ViewModels
 
         private Task CanceRecordlTransfer()
         {
-            return Gauge.CancelRecordTransfer();
+            return Gauge?.CancelRecordTransfer() ?? Task.CompletedTask;
         }
 
         public ICommand DeleteRecordCommand { get; private set; }
@@ -158,7 +187,7 @@ namespace Sample.TMLink.Client.ViewModels
             {
                 try
                 {
-                    if (record != null && !string.IsNullOrWhiteSpace(record.Name))
+                    if (record != null && !string.IsNullOrWhiteSpace(record.Name) && Gauge != null)
                     {
                         await Gauge.DeleteRecord(record);
                         await DoUpdate();
@@ -167,7 +196,7 @@ namespace Sample.TMLink.Client.ViewModels
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Problem deleting record {Name}", record?.Name);
-                    await _platformService.ShowMessage($"There was a problem deleting the record {record?.Name} - {ex.Message}");
+                    await _userDialogService.ShowMessage($"There was a problem deleting the record {record?.Name} - {ex.Message}");
                 }
             });
         }
@@ -180,13 +209,18 @@ namespace Sample.TMLink.Client.ViewModels
             {
                 try
                 {
+                    if (Gauge == null)
+                    {
+                        return;
+                    }
+
                     await Gauge.DeleteAllRecords();
                     await DoUpdate();
                 }
                 catch(Exception ex) 
                 {
                     _logger.LogError(ex, "Problem deleting all records");
-                    await _platformService.ShowMessage($"There was a problem deleting all records - {ex.Message}");
+                    await _userDialogService.ShowMessage($"There was a problem deleting all records - {ex.Message}");
                 }
             });
         }
@@ -206,41 +240,35 @@ namespace Sample.TMLink.Client.ViewModels
 
         private async Task DoUpdate()
         {
-            IsConnected = Gauge.IsConnected;
-            var recordList = await Gauge.GetRecordList();
-            if (recordList != null)
+            IsConnected = Gauge?.IsConnected ?? false;
+            if (Gauge != null)
             {
-                RecordList = recordList.Select(r => new RecordViewModel()
+                var recordList = await Gauge.GetRecordList();
+                if (recordList != null)
                 {
-                    Key = r.Key,
-                    Name = r.RecordName,
-                    RecordType = r.RecordType,
-                    MeasurementCount = r.NumberOfPointsRequired,
-                    MeasurementsTaken = r.PointCount,
-                    Created = r.Created,
-                    Updated = r.Updated
-                });
+                    RecordList = recordList.Select(r => new RecordViewModel()
+                    {
+                        Key = r.Key,
+                        Name = r.RecordName,
+                        RecordType = r.RecordType,
+                        MeasurementCount = r.NumberOfPointsRequired,
+                        MeasurementsTaken = r.PointCount,
+                        Created = r.Created,
+                        Updated = r.Updated
+                    });
+                }
             }
         }
 
         internal void Clear()
         {
-            IsConnected = Gauge.IsConnected;
+            IsConnected = Gauge?.IsConnected ?? false;
             RecordList = [];
         }
 
         partial void OnRecordListChanged(IEnumerable<RecordViewModel> value)
         {
             Measurements.Clear();
-        }
-
-        partial void OnGaugeChanged(ITMLinkGauge value)
-        {
-            Name = value.Name;
-            Model = value.Model;
-            SerialNumber = value.SerialNumber;
-            FirmwareVersion = value.FirmwareVersion;
-            value.AddObserver(this);
         }
 
         partial void OnIsConnectedChanged(bool value)
@@ -255,11 +283,11 @@ namespace Sample.TMLink.Client.ViewModels
         {
             if (value)
             {
-                Gauge.SubscribeToLiveUpdates();
+                Gauge?.SubscribeToLiveUpdates();
             }
             else
             {
-                Gauge.UnsubscribeFromLiveUpdates();
+                Gauge?.UnsubscribeFromLiveUpdates();
             }   
         }
 
@@ -281,6 +309,10 @@ namespace Sample.TMLink.Client.ViewModels
                 Velocity = _measurementConverter.GetDisplayedVelocity(liveMeasurement.Velocity, liveMeasurement.Units),
                 HasAScan = liveMeasurement.AScan.Amplitudes?.Length > 0,
             };
+        }
+
+        public void OnPropertiesUpdated(IGauge gauge)
+        {
         }
     }
 }

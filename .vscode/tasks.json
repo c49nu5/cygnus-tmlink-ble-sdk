@@ -4,14 +4,14 @@
         {
             "label": "vite: dev",
             "type": "npm",
-			"path": "Sample.BLE.TypeScript",
+			"path": "Sample.TMLink.TypeScript",
             "script": "dev",
             
             // Vite dev runs indefinitely in the background
             // Since it never exits, VS Code waits indefinitely for it to finish
             // This is a workaround to tell VS Code to not wait before launching the next task
             "isBackground": true,
-			"dependsOn": ["npm: build - Sample.BLE.TypeScript"],
+			"dependsOn": ["npm: build - Sample.TMLink.TypeScript"],
             "problemMatcher": [
                 {
                     "pattern": [
@@ -33,10 +33,10 @@
 		{
 			"type": "npm",
 			"script": "build",          
-			"path": "Sample.BLE.TypeScript",
+			"path": "Sample.TMLink.TypeScript",
 			"group": "build",
 			"problemMatcher": [],
-			"label": "npm: build - Sample.BLE.TypeScript",
+			"label": "npm: build - Sample.TMLink.TypeScript",
 			"detail": "tsc && vite build"
 		}
 	]

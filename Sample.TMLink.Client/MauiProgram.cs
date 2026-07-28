@@ -4,6 +4,7 @@ using CommunityToolkit.Maui;
 using Cygnus.TMLink.API.Maui;
 using Cygnus.Services;
 using Microsoft.Extensions.Logging;
+using Cygnus.Interfaces;
 
 namespace Sample.TMLink.Client;
 
@@ -22,7 +23,7 @@ public static class MauiProgram
 
 		builder.Services.AddTransient<ScannerViewModel>();
 		builder.Services.AddTransient<GaugeViewModel>();
-		builder.Services.AddSingleton<Func<GaugeViewModel>>(s => s.GetRequiredService<GaugeViewModel>);
+		builder.Services.AddSingleton<Func<IConnectionInformation, GaugeViewModel>>(s => c => ActivatorUtilities.CreateInstance<GaugeViewModel>(s, c));
         builder.Services.AddTransientPopup<NewRecordView, NewRecordViewModel>();
 
         builder.Services.AddTMLinkMauiServices();
