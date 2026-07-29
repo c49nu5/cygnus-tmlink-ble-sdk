@@ -61,7 +61,7 @@
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0B4E9D" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0B4E9D" BaseSize="144,144" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#2F628C" BaseSize="144,144" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -81,23 +81,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Images\7jo1.gif" />
-	  <None Remove="Resources\Images\scanning.gif" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <BundleResource Include="Resources\Images\scanning.gif" />
-	  <BundleResource Include="Resources\Images\spinner.gif" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\Cygnus.TMLink.API.Maui\Cygnus.TMLink.API.Maui.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Update="Views\Scanner.xaml.cs">
-	    <DependentUpon>Scanner.xaml</DependentUpon>
-	  </Compile>
 	</ItemGroup>
 
 </Project>
