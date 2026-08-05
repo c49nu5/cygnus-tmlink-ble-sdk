@@ -217,6 +217,7 @@ public partial class MainViewModel : ObservableObject
                 {
                     LastReadTime = DateTime.Now.ToString();
                     byte[] chunk = readCharacteristicValue?.Skip(request.Offset).ToArray() ?? [];
+                    System.Diagnostics.Debug.WriteLine($"Read request: Offset={request.Offset}, MTU={request.Peripheral.Mtu}, ChunkSize={chunk.Length}");
                     return Task.FromResult(GattResult.Success(chunk));
                 });
             }

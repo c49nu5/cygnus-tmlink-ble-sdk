@@ -78,12 +78,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Cygnus.TMLink.Protobuf" Version="1.5.1-21" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
+		<PackageReference Include="Cygnus.TMLink.Protobuf" Version="1.9.1" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.10" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<PackageReference Include="Shiny.BluetoothLE.Hosting" Version="5.2.4" />
-		<PackageReference Include="Shiny.Hosting.Maui" Version="5.2.4" />
+		<PackageReference Include="Shiny.BluetoothLE.Hosting" Version="5.3.0" />
+		<PackageReference Include="Shiny.Hosting.Maui" Version="5.3.0" />
 		<PackageReference Include="System.Reactive.Linq" Version="6.1.0" />
 	</ItemGroup>
 

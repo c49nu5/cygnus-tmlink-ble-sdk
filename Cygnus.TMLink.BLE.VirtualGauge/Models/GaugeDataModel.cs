@@ -81,7 +81,7 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 Name = record.Name,
                 recordType = record.recordType,
                 numPointsRequired = record.numPointsRequired,
-                numPointsTaken = record.numPointsTaken,
+                numPointsTaken = record.numPointsTaken,                
                 Created = record.Created,
                 Updated = record.Updated,
                 recordID = recordId,
@@ -116,10 +116,7 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 Taken = DateTime.Now.AddSeconds(-Random.Shared.Next(1000)),
                 Thickness = (uint)Random.Shared.Next(45000),
                 Velocity = (uint)Random.Shared.Next(1000, 9000),
-                Ascan = new()
-                {
-                    ascanPoints = new byte[Random.Shared.Next(2) * 320]
-                }
+                Ascan = CreateAScan()
             };
 
             point.Name = recordType == RecordType.Linear ? $"P{index + 1}" : $"R{point.rowNumY + 1}.C{point.colNumX}";
@@ -137,10 +134,10 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 Message.BScanList.Item item = new()
                 {
                     Name = $"{DateTime.Now.AddDays(- 1 - BScanList.Items.Count):ddMMMyy}_{DateTime.Now:HHmm}",
-                    numScanPoints = requiredPoints,
+                    numScanPoints = requiredPoints,                    
                     Updated = DateTime.Now,
                     fileSize = requiredPoints * 100u,
-                    Key = $"TML{(uint)DateTime.Now.TimeOfDay.TotalSeconds}"
+                    Key = $"TML{(uint)DateTime.Now.TimeOfDay.TotalSeconds}"                   
                 };
                 BScanList.Items.Add(item);
 
@@ -154,10 +151,11 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
             var gaugeBscan = new Message.BScan
             {
                 Name = Bscan.Name,
-                numScanPoints = Bscan.numScanPoints,
+                numScanPoints = Bscan.numScanPoints,                
                 Updated = Bscan.Updated,
                 BScanID = BscanId,
-                Key = Bscan.Key
+                Key = Bscan.Key,                
+                scanInterval = 195u
             };
 
             List<Message.BScanPoint> bscanPoints = new List<Message.BScanPoint>();
@@ -180,10 +178,7 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 probeType = ProbeType.Single,
                 Thickness = (uint)Random.Shared.Next(45000),
                 Velocity = (uint)Random.Shared.Next(1000, 9000),
-                Ascan = new()
-                {
-                    ascanPoints = new byte[Random.Shared.Next(2) * 320]
-                }
+                Ascan = CreateAScan()
             };
 
             return point;
@@ -305,10 +300,7 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 surfaceTemp = 25,
                 UTMode = UTMode.Se,
                 Velocity = 5900,
-                Ascan = new AScan()
-                {
-                    ascanPoints = Enumerable.Range(0, 320).Select(i => (byte)(i % 256)).ToArray(),
-                }
+                Ascan = CreateAScan()
             };
         }
 
@@ -336,5 +328,15 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
 
             return bScanPoint;
         }
+
+        private static AScan CreateAScan()
+        {
+            return new()
+            {
+                ascanPoints = Enumerable.Range(0, 320).Select(i => (byte)(Random.Shared.Next(60) - 30)).ToArray(),
+                ascanWidth = 30
+            };
+        }
+
     }
 }
