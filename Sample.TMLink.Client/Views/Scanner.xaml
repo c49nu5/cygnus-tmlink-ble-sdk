@@ -30,7 +30,10 @@
         <HorizontalStackLayout Grid.Row="0">
             <Button Text="{Binding ToggleScanningCmdLabelText}"
                 Command="{Binding ToggleScanning}" />
-            <ActivityIndicator IsRunning="{Binding IsScanning}" Margin="8"/>
+            <ActivityIndicator 
+                IsRunning="{Binding ConnectionState, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:ConnectionState.Connecting}}"
+                IsVisible="{Binding ConnectionState, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:ConnectionState.Connecting}}"
+                Margin="8"/>
 
         </HorizontalStackLayout>
 

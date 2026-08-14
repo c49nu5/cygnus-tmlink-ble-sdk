@@ -9,7 +9,7 @@ public partial class Scanner : ContentPage
         BindingContext = App.Services?.GetRequiredService<ScannerViewModel>();
     }
 
-    private void GaugeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void GaugeList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection?.FirstOrDefault() != null)
         {
