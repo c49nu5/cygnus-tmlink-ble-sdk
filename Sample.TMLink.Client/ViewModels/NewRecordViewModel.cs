@@ -97,7 +97,7 @@ namespace Sample.TMLink.Client.ViewModels
                     Measurements.Add(new NewMeasurementViewModel()
                     {
                         Key = 44362811 + c * 100 + r,
-                        Name = $"C{r}.R{r}",
+                        Name = $"C{c+1}.R{r+1}",
                         ColNumX = c,
                         RowNumY = r,
                         Method = Method.Spot,
