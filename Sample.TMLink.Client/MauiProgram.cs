@@ -5,6 +5,7 @@ using Cygnus.TMLink.API.Maui;
 using Cygnus.Services;
 using Microsoft.Extensions.Logging;
 using Cygnus.Interfaces;
+using System.Globalization;
 
 namespace Sample.TMLink.Client;
 
@@ -12,6 +13,7 @@ public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
+		CultureInfo.CurrentUICulture = CultureInfo.InstalledUICulture;
 		var builder = MauiApp.CreateBuilder()
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()

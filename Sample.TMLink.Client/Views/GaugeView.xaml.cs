@@ -14,7 +14,7 @@ public partial class GaugeView : ContentPage
         if (args.NavigationType != NavigationType.Push &&
             BindingContext is GaugeViewModel gaugeViewModel)
         {
-            gaugeViewModel.Gauge.Disconnect();
+            gaugeViewModel.Gauge?.Disconnect();
         }
 
         base.OnNavigatedFrom(args);
