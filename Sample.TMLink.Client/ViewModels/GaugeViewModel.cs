@@ -7,13 +7,12 @@ using Cygnus.Models;
 using Cygnus.TMLink.API.Maui;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Windows.Input;
 
 namespace Sample.TMLink.Client.ViewModels
 {
-    public partial class GaugeViewModel : ObservableObject, IGaugeObserver
+    public partial class GaugeViewModel : ObservableObject, IGaugeObserver, ILiveMeasurementObserver
     {
         private readonly ILogger<GaugeViewModel> _logger;
         private readonly IPopupService _popupService;
@@ -42,6 +41,9 @@ namespace Sample.TMLink.Client.ViewModels
 
         [ObservableProperty]
         public partial LiveMeasurementViewModel LiveMeasurement { get; set; } = new LiveMeasurementViewModel();
+
+        [ObservableProperty]
+        public partial uint BatteryLevel { get; set; }
 
         public ICommand NewRecordCommand { get; private set; }
 
@@ -283,11 +285,11 @@ namespace Sample.TMLink.Client.ViewModels
         {
             if (value)
             {
-                Gauge?.SubscribeToLiveUpdates();
+                Gauge?.SubscribeToLiveUpdates(this);
             }
             else
             {
-                Gauge?.UnsubscribeFromLiveUpdates();
+                Gauge?.UnsubscribeFromLiveUpdates(this);
             }   
         }
 
@@ -295,7 +297,6 @@ namespace Sample.TMLink.Client.ViewModels
         {
             LiveMeasurement = new LiveMeasurementViewModel
             {
-                BatteryLevel = liveMeasurement.BatteryLevel,
                 GaindB = liveMeasurement.GaindB,
                 Index = liveMeasurement.PointIndex,
                 IsDeepcoat = liveMeasurement.DeepCoatOn,
@@ -313,6 +314,7 @@ namespace Sample.TMLink.Client.ViewModels
 
         public void OnPropertiesUpdated(IGauge gauge)
         {
+            BatteryLevel = gauge.BatteryLevel;
         }
     }
 }

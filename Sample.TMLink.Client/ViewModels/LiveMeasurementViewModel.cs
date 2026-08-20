@@ -12,8 +12,6 @@ namespace Sample.TMLink.Client.ViewModels
 
         public MeasureMode Mode { get; set; }
 
-        public uint BatteryLevel { get; set; }
-
         public float GaindB { get; set; }
 
         public uint Index { get; set; }
