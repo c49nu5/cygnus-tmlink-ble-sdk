@@ -1,3 +1,4 @@
+using Cygnus.Interfaces;
 using Sample.TMLink.Client.ViewModels;
 
 namespace Sample.TMLink.Client.Views;
@@ -12,9 +13,10 @@ public partial class GaugeView : ContentPage
     protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
     {
         if (args.NavigationType != NavigationType.Push &&
-            BindingContext is GaugeViewModel gaugeViewModel)
+            BindingContext is GaugeViewModel gaugeViewModel &&
+            gaugeViewModel.Gauge is IGauge gauge)
         {
-            gaugeViewModel.Gauge?.Disconnect();
+            gauge.Disconnect();
         }
 
         base.OnNavigatedFrom(args);
