@@ -17,8 +17,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Cygnus.Services" Version="1.10.0-PullRequest8.2" />
-		<PackageReference Include="Cygnus.TMLink.API" Version="1.10.0-PullRequest8.2" />
+		<PackageReference Include="Cygnus.Services" Version="1.9.6" />
+		<PackageReference Include="Cygnus.TMLink.API" Version="1.9.6" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />
 	</ItemGroup>
 
