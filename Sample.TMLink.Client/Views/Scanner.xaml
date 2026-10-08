@@ -26,15 +26,19 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
-        <HorizontalStackLayout Grid.Row="0">
-            <Button Text="{Binding ToggleScanningCmdLabelText}"
-                Command="{Binding ToggleScanning}" />
-            <ActivityIndicator 
-                IsRunning="{Binding ConnectionState, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:ConnectionState.Connecting}}"
-                IsVisible="{Binding ConnectionState, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:ConnectionState.Connecting}}"
-                Margin="8"/>
 
+        <HorizontalStackLayout Grid.Row="0">
+            <Button Text="Start Scan"
+                IsVisible="{Binding ConnectionState, Converter={toolkit:IsNotEqualConverter}, ConverterParameter={x:Static models:ConnectionState.Connecting}}"
+                Command="{Binding ScanForGaugesCommand}" />
+            <HorizontalStackLayout
+                IsVisible="{Binding ConnectionState, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:ConnectionState.Connecting}}">
+                <Button Text="Cancel"
+                    Command="{Binding ScanForGaugesCancelCommand}" />
+                <ActivityIndicator 
+                    IsRunning="{Binding ConnectionState, Converter={toolkit:IsEqualConverter}, ConverterParameter={x:Static models:ConnectionState.Connecting}}"
+                    Margin="8"/>
+            </HorizontalStackLayout>
         </HorizontalStackLayout>
 
         <CollectionView

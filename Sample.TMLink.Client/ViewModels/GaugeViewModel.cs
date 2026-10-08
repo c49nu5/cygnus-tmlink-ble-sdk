@@ -8,7 +8,6 @@ using Cygnus.TMLink.API.Maui;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows.Input;
 
 namespace Sample.TMLink.Client.ViewModels
 {
@@ -31,12 +30,6 @@ namespace Sample.TMLink.Client.ViewModels
             _userDialogService = userDialogService;
             _measurementConverter = measurementConverter;
             Connection = connectionInformation;
-            GetRecordCommand = new RelayCommand<RecordViewModel>(r => GetRecord(r, false));
-            GetRecordWithAScansCommand = new RelayCommand<RecordViewModel>(r => GetRecord(r, true));
-            CancelRecordTransferCommand = new AsyncRelayCommand(CanceRecordlTransfer);
-            DeleteRecordCommand = new RelayCommand<RecordViewModel>(DeleteRecord);
-            DeleteAllRecordsCommand = new RelayCommand(DeleteAllRecords);
-            NewRecordCommand = new AsyncRelayCommand(NewRecord);
         }
 
         [ObservableProperty]
@@ -45,8 +38,7 @@ namespace Sample.TMLink.Client.ViewModels
         [ObservableProperty]
         public partial uint BatteryLevel { get; set; }
 
-        public ICommand NewRecordCommand { get; private set; }
-
+        [RelayCommand]
         private async Task NewRecord()
         {
             Page? page = App.Current?.Windows[0].Page;
@@ -141,9 +133,17 @@ namespace Sample.TMLink.Client.ViewModels
 
         public ObservableCollection<MeasurementViewModel> Measurements { get; private set; } = new ObservableCollection<MeasurementViewModel>();
 
-        public ICommand GetRecordCommand { get; private set; }
+        [RelayCommand]
+        public void GetRecord(RecordViewModel? record)
+        {
+            GetRecord(record, false);
+        }
 
-        public ICommand GetRecordWithAScansCommand { get; private set; }
+        [RelayCommand]
+        public void GetRecordWithAScans(RecordViewModel? record)
+        {
+            GetRecord(record, true);
+        }
 
         private void GetRecord(RecordViewModel? record, bool withAScans)
         {
@@ -174,15 +174,13 @@ namespace Sample.TMLink.Client.ViewModels
             });
         }
 
-        public ICommand CancelRecordTransferCommand { get; private set; }
-
-        private Task CanceRecordlTransfer()
+        [RelayCommand]
+        private Task CancelRecordTransfer()
         {
             return Gauge?.CancelRecordTransfer() ?? Task.CompletedTask;
         }
 
-        public ICommand DeleteRecordCommand { get; private set; }
-
+        [RelayCommand]
         private void DeleteRecord(RecordViewModel? record)
         {
             MainThread.InvokeOnMainThreadAsync(async () =>
@@ -203,8 +201,7 @@ namespace Sample.TMLink.Client.ViewModels
             });
         }
 
-        public ICommand DeleteAllRecordsCommand { get; private set; }
-
+        [RelayCommand]
         private void DeleteAllRecords()
         {
             MainThread.InvokeOnMainThreadAsync(async () =>
@@ -248,7 +245,7 @@ namespace Sample.TMLink.Client.ViewModels
                 var recordList = await Gauge.GetRecordList();
                 if (recordList != null)
                 {
-                    RecordList = recordList.Select(r => new RecordViewModel()
+                    RecordList = recordList.Select(r => new RecordViewModel(this)
                     {
                         Key = r.Key,
                         Name = r.RecordName,
@@ -315,6 +312,11 @@ namespace Sample.TMLink.Client.ViewModels
         public void OnPropertiesUpdated(IGauge gauge)
         {
             BatteryLevel = gauge.BatteryLevel;
+        }
+
+        internal void Disconnect()
+        {
+            Gauge?.Disconnect();
         }
     }
 }

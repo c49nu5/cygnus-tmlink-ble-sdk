@@ -4,8 +4,10 @@ using Cygnus.Models;
 
 namespace Sample.TMLink.Client.ViewModels
 {
-    public partial class RecordViewModel : ObservableObject, IFileTransferRequest
+    public partial class RecordViewModel(GaugeViewModel gauge) : ObservableObject, IFileTransferRequest
     {
+        public GaugeViewModel Gauge { get; } = gauge;
+
         public string Key { get; internal set; } = string.Empty;
         public string Name { get; internal set; } = string.Empty;
         public RecordType RecordType { get; internal set; }
@@ -19,7 +21,6 @@ namespace Sample.TMLink.Client.ViewModels
 
         [ObservableProperty]
         public partial FileTransferState Status { get; set; }
-
     }
 }
 

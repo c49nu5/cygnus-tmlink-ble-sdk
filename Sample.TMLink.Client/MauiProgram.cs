@@ -23,7 +23,7 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		builder.Services.AddTransient<ScannerViewModel>();
+		builder.Services.AddSingleton<ScannerViewModel>();
 		builder.Services.AddTransient<GaugeViewModel>();
 		builder.Services.AddSingleton<Func<IConnectionInformation, GaugeViewModel>>(s => c => ActivatorUtilities.CreateInstance<GaugeViewModel>(s, c));
         builder.Services.AddTransientPopup<NewRecordView, NewRecordViewModel>();

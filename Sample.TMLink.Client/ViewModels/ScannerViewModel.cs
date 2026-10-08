@@ -5,7 +5,6 @@ using Cygnus.Models;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows.Input;
 
 namespace Sample.TMLink.Client.ViewModels
 {
@@ -22,10 +21,6 @@ namespace Sample.TMLink.Client.ViewModels
             IMeasurementDisplaySettingsService measurementSettingsService,
             Func<IConnectionInformation,GaugeViewModel> gaugeViewFactory)
         {
-            ConnectCommand = new RelayCommand<GaugeViewModel?>(Connect);
-            ToggleScanning = new RelayCommand(ToggleScanForGauges);
-            SetUnitsCommand = new RelayCommand<MeasurementUnits?>(SetUnits, CanSetUnits);
-            SetResolutionCommand = new RelayCommand<MeasurementResolution?>(SetResolution, CanSetResolution);
             _logger = logger;
             _connectionService = connectionService;
             _measurementSettingsService = measurementSettingsService;
@@ -40,14 +35,7 @@ namespace Sample.TMLink.Client.ViewModels
         public partial GaugeViewModel? SelectedGauge { get; set; }
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(Waiting))]
-        [NotifyPropertyChangedFor(nameof(ScanState))]
-        [NotifyPropertyChangedFor(nameof(ToggleScanningCmdLabelText))]
         public partial ConnectionState ConnectionState { get; set; }
-
-        public bool Waiting => ConnectionState == ConnectionState.Connecting;
-        public string ScanState => ConnectionState == ConnectionState.Connecting ? "Scanning" : "Waiting";
-        public string ToggleScanningCmdLabelText => ConnectionState == ConnectionState.Connecting ? "Cancel" : "Start Scan";
 
         private void DebugMessage(string message)
         {
@@ -56,29 +44,15 @@ namespace Sample.TMLink.Client.ViewModels
         }
 
         #region Scan & Discover
-        public ICommand ToggleScanning { get; init; }
-
-        private void ToggleScanForGauges()
+        [RelayCommand(IncludeCancelCommand = true)]
+        public async Task ScanForGauges(CancellationToken cancellationToken)
         {
-            if (ConnectionState != ConnectionState.Connecting)
-            {
-                DebugMessage($"Starting Scan");
-                Dispatcher.GetForCurrentThread()?.DispatchAsync(async () =>
-                {
-                    await _connectionService.DiscoverGauges();
-                    DebugMessage($"Completed Scan");
-                });
-            }
-            else
-            {
-                DebugMessage($"Canceling Scanning");
-                _connectionService.CancelDiscover();
-                ConnectionState = ConnectionState.Disconnected;
-            }
+            DebugMessage($"Starting Scan");
+            await _connectionService.DiscoverGauges(cancellationToken);
+            DebugMessage($"Completed Scan");
         }
 
-        public ICommand ConnectCommand { get; init; }
-
+        [RelayCommand]
         private void Connect(GaugeViewModel? value)
         {
             if (value?.Connection != null)
@@ -88,8 +62,7 @@ namespace Sample.TMLink.Client.ViewModels
             }
         }
 
-        public RelayCommand<MeasurementUnits?> SetUnitsCommand { get; init; }
-
+        [RelayCommand(CanExecute = nameof(CanSetUnits))]
         private void SetUnits(MeasurementUnits? units)
         {           
             _measurementSettingsService.Units = units ?? MeasurementUnits.Default;
@@ -101,8 +74,7 @@ namespace Sample.TMLink.Client.ViewModels
             return _measurementSettingsService.Units != units;
         }
 
-        public RelayCommand<MeasurementResolution?> SetResolutionCommand { get; init; }
-
+        [RelayCommand(CanExecute = nameof(CanSetResolution))]
         private void SetResolution(MeasurementResolution? Resolution)
         {
             _measurementSettingsService.Resolution = Resolution ?? MeasurementResolution.Default;

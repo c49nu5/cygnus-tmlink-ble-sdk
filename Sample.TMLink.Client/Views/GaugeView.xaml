@@ -46,17 +46,17 @@
                         <Label Text="{Binding Created}" WidthRequest="160" VerticalOptions="Center"/>
                         <Button 
                             Text="X" 
-                            Command="{Binding DeleteRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                            Command="{Binding Gauge.DeleteRecordCommand}" 
                             CommandParameter="{Binding}" 
                             Margin="10,5"/>
                         <Button 
                             Text="Get Record" 
-                            Command="{Binding GetRecordCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                            Command="{Binding Gauge.GetRecordCommand}" 
                             CommandParameter="{Binding}" 
                             Margin="10,5"/>
                         <Button 
                             Text="Get With A-Scans" 
-                            Command="{Binding GetRecordWithAScansCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                            Command="{Binding Gauge.GetRecordWithAScansCommand}" 
                             CommandParameter="{Binding}" 
                             Margin="10,5"/>
                         <HorizontalStackLayout
@@ -65,7 +65,7 @@
                             <ProgressBar Progress="{Binding PercentageTransferred}" WidthRequest="100" HeightRequest="10" VerticalOptions="Center"/>
                             <Button 
                                 Text="Cancel"
-                                Command="{Binding CancelRecordTransferCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:GaugeViewModel}}, x:DataType=viewModels:GaugeViewModel}" 
+                                Command="{Binding Gauge.CancelRecordTransferCommand}" 
                                 CommandParameter="{Binding}"
                                 Margin="10,5"/>
                         </HorizontalStackLayout>
