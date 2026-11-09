@@ -1,5 +1,6 @@
 ﻿using Cygnus.TMLink.Protobuf.V1;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Cygnus.TMLink.BLE.VirtualGauge.Models
 {
@@ -76,6 +77,8 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
         internal Message.Record CreateRecord(Message.RecordList.Item record, uint colCount)
         {
             uint recordId = (uint)DateTime.Now.TimeOfDay.Seconds;
+            int numUserFields = Random.Shared.Next(0, 3);
+            int numComments = Random.Shared.Next(0, 8);
             var gaugeRecord = new Message.Record
             {
                 Name = record.Name,
@@ -89,13 +92,15 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 recordID = recordId,
                 Surveyor = "John Doe",
                 Location = $"Pipeline {Random.Shared.Next(1, 15)}",               
-                Key = record.Key
+                Key = record.Key,
+                userFieldValues = CreateUserFields(numUserFields),
+                commentList = CreateComments(numComments)
             };
 
-            List<Message.RecordPoint> recordPoints = new List<Message.RecordPoint>();
+            List<Message.RecordPoint> recordPoints = [];
             for (uint i = 0; i < record.numPointsTaken; i++)            
             {
-                var point = CreateRecordPoint(i, record.recordType, colCount);
+                var point = CreateRecordPoint(i, record.recordType, colCount, numComments);
                 recordPoints.Add(point);
             }
 
@@ -103,8 +108,70 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
             return gaugeRecord;
         }
 
-        private Message.RecordPoint CreateRecordPoint(uint index, RecordType recordType, uint colCount)
+        private CommentList? CreateComments(int numComments)
         {
+            if (numComments > 2)
+            {
+                CommentList commentList = new();
+                commentList.Comments.AddRange(Enumerable.Range(0, numComments).Select(i => $"Comment{i + 1}"));
+                return commentList;
+            }
+
+            return null;
+        }
+
+        private Message.Record.UserFieldValues? CreateUserFields(int numUserFields)
+        {
+            if (numUserFields > 0)
+            {
+                var userFieldValues = new Message.Record.UserFieldValues();
+                userFieldValues.Items.AddRange(Enumerable.Range(0, numUserFields).Select(i => CreateUserFieldValue()));
+                return userFieldValues;
+            }
+
+            return null;
+        }
+
+        private static Message.Record.UserFieldValues.UserFieldValue CreateUserFieldValue()
+        {
+            UserFieldType userFieldType = (UserFieldType)Random.Shared.Next(0, Enum.GetValues(typeof(UserFieldType)).Length);
+            string value = $"Value{Random.Shared.Next(1, 100)}";
+            switch (userFieldType)
+            {
+                case UserFieldType.NotUsed:
+                    userFieldType = UserFieldType.Text;
+                    break;
+                case UserFieldType.Number:
+                    value = $"{Random.Shared.Next(1, 100)}";
+                    break;
+                case UserFieldType.DateDMY:
+                    value = DateTime.Now.AddDays(-Random.Shared.Next(100)).ToString("dd/MM/yyyy");
+                    break;
+                case UserFieldType.DateMDY:
+                    value = DateTime.Now.AddDays(-Random.Shared.Next(100)).ToString("MM/dd/yyyy");
+                    break;
+                case UserFieldType.YesNo:
+                    value = Random.Shared.Next(2) == 1 ? "Yes" : "No";
+                    break;
+            }
+
+            return new Message.Record.UserFieldValues.UserFieldValue
+            {
+                ufName = "UserField {i + 1}",
+                ufValue = value,
+                ufType = userFieldType
+            };
+        }
+
+        private Message.RecordPoint CreateRecordPoint(uint index, RecordType recordType, uint colCount, int numComments)
+        {
+            byte commentByte = 0;
+            int commentCount = Random.Shared.Next(numComments / 2);
+            for (int c = 0; c < commentCount; c++)
+            {
+                commentByte |= (byte)Math.Pow(2, c);
+            }
+
             var point = new Message.RecordPoint
             {
                 Key = 232132 + index,
@@ -118,7 +185,8 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 Taken = DateTime.Now.AddSeconds(-Random.Shared.Next(1000)),
                 Thickness = (uint)Random.Shared.Next(45000),
                 Velocity = (uint)Random.Shared.Next(1000, 9000),
-                Ascan = CreateAScan()
+                Ascan = CreateAScan(),
+                commentByte = commentByte
             };
 
             point.Name = recordType == RecordType.Linear ? $"P{index + 1}" : $"R{point.rowNumY + 1}.C{point.colNumX}";
@@ -156,14 +224,17 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 numScanPoints = Bscan.numScanPoints,                
                 Updated = Bscan.Updated,
                 BScanID = BscanId,
-                Key = Bscan.Key,                
+                Key = Bscan.Key,
                 scanInterval = 195u
             };
+
+            var velocity = (uint)Random.Shared.Next(1000, 9000);
 
             List<Message.BScanPoint> bscanPoints = new List<Message.BScanPoint>();
             for (uint i = 0; i < Bscan.numScanPoints; i++)
             {
                 var point = CreateBscanPoint(i);
+                point.Velocity = velocity;
                 bscanPoints.Add(point);
             }
 
@@ -179,7 +250,6 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 UTMode = UTMode,
                 probeType = ProbeType.Single,
                 Thickness = (uint)Random.Shared.Next(45000),
-                Velocity = (uint)Random.Shared.Next(1000, 9000),
                 Ascan = CreateAScan()
             };
 
@@ -208,12 +278,12 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 numPointsRequired = requiredPoints,
                 Created = createdTime,
                 recordID = recordId,
-                Key = record.Key
+                Key = record.Key,
             };
             Records.Add(gaugeRecord);
         }
 
-        internal void AddRecordPoints(Protobuf.V1.Command.AddRecordPoints addRecordPoints)
+        internal void AddRecordPoints(Protobuf.V1.Command.AddPoints addRecordPoints)
         {
             var recordListItem = RecordList.Items.FirstOrDefault(r => r.Name == addRecordPoints.Name);
             if (recordListItem == null)
@@ -243,9 +313,11 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                     Method = p.Method,
                 };
                 point.Name = record.recordType == RecordType.Linear ? $"P{point.colNumX}" : $"R{point.rowNumY + 1}.C{point.colNumX}";
-                switch(Random.Shared.Next(4))
+                switch(Random.Shared.Next(6))
                 {
                     case 0:
+                    case 1:
+                    case 2:
                         record.numPointsTaken++;
                         point.Uom = UoM;
                         point.UTMode = UTMode;
@@ -253,19 +325,16 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                         point.Taken = DateTime.Now;
                         point.Thickness = (uint)Random.Shared.Next(1000, 45000);
                         point.Velocity = (uint)Random.Shared.Next(1000, 45000);
-                        point.Ascan = new()
-                        {
-                            ascanPoints = Random.Shared.Next(2) == 1 ? new byte[320] : new byte[640]
-                        };
+                        point.Ascan = CreateAScan();
                         point.State = MeasurementPointState.Valid;
                         break;
-                    case 1:
+                    case 3:
                         point.State = MeasurementPointState.Blank;
                         break;
-                    case 2:
+                    case 4:
                         point.State = MeasurementPointState.Obstructed;
                         break;
-                    case 3:
+                    case 5:
                         point.State = MeasurementPointState.NoReading;
                         break;
                 }
@@ -275,35 +344,48 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
             recordListItem.numPointsTaken = record.numPointsTaken;
         }
 
-        public NotifyLiveMeasurement CreateLiveMeasurement(LiveMeasurementType measurementType, string liveThickness)
+        public NotifyLiveMeasurement CreateLiveMeasurement(LiveMeasurementType measurementType, string liveThickness, bool isStable)
         {
+            int flags = measurementType == LiveMeasurementType.Live ? Constants.DeepcoatFlag | Constants.IsValidFlag : Constants.DeepcoatFlag | Constants.IsFrozenFlag | Constants.IsValidFlag;
+            if (isStable)
+            {
+                flags |= Constants.IsStableFlag;
+            }
+
             return new NotifyLiveMeasurement()
             {
                 batteryLevel = GaugeInfo?.batteryLevel ?? 0,
-                Thickness = double.TryParse(liveThickness, out var thickness) ? (uint)thickness : 0,
+                Thickness = GetThickness(liveThickness, isStable),
                 gaindB = 20,
                 Index = measurementType == LiveMeasurementType.Live ? _liveMeasurementIndex++ : _frozenMeasurementIndex++,
                 liveMeasurementType = measurementType,
-                statusBits = (uint)(measurementType == LiveMeasurementType.Live ? Constants.DeepcoatFlag | Constants.IsValidFlag : Constants.DeepcoatFlag | Constants.IsFrozenFlag | Constants.IsValidFlag),
+
+                statusBits = (uint)flags,
                 surfaceTemp = 25,
                 UTMode = UTMode.Se,
                 Velocity = 5900
             };
         }
 
-        public FrozenLiveMeasurement CreateFrozenLiveMeasurement(string frozenThickness)
+        public FrozenLiveMeasurement CreateFrozenLiveMeasurement(string frozenThickness, bool isStable)
         {
             return new FrozenLiveMeasurement()
             {
                 batteryLevel = GaugeInfo?.batteryLevel ?? 0,
-                Thickness = double.TryParse(frozenThickness, out var thickness) ? (uint)thickness : 0,
+                Thickness = GetThickness(frozenThickness, isStable),
                 gaindB = 20,
                 Index = _frozenMeasurementIndex,
                 surfaceTemp = 25,
                 UTMode = UTMode.Se,
                 Velocity = 5900,
-                Ascan = CreateAScan()
+                Ascan = CreateAScan(),
+                stableMeasurement = isStable
             };
+        }
+
+        private static uint GetThickness(string liveThickness, bool isStable)
+        {
+            return double.TryParse(liveThickness, out var thickness) ? (uint)(thickness + (isStable ? 0 : Random.Shared.Next(20))) : 0;
         }
 
         public Message.RecordPoint? GetRecordPoint(string recordName, bool withAScans)
@@ -339,6 +421,5 @@ namespace Cygnus.TMLink.BLE.VirtualGauge.Models
                 ascanWidth = 30
             };
         }
-
     }
 }

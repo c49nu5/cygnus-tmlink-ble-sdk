@@ -7,6 +7,16 @@ option csharp_namespace = "Cygnus.TMLink.Protobuf.V1";
 import "google/protobuf/timestamp.proto";
 
 // =====================================================================================================
+// Change History.
+// Jul-2026 Cygnus.V1
+// - Added numColumns and numRows to the Get Record Header. 
+// - Removed ReadSerialNumber and ReadProtoVersion.
+// Oct-2026 Cygnus.V1
+// - Added Template messages, including UserFields.
+// 
+// =====================================================================================================
+
+// =====================================================================================================
 // # BLE Arrangement.
 // =====================================================================================================
 //
@@ -197,7 +207,9 @@ message Command
     string name                           = 3;          // Optional name of a Record or BScan. (30 chars max).
     NewRecord newRecord                   = 4;          // Optional newRecord message.
     AddRecordPoints addRecordPoints       = 5;          // Optional addRecordPoints message.
-
+	NewTemplate newTemplate               = 6;          // Optional newTemplate message.
+	AddTemplatePoints addTemplatePoints   = 7;          // Optional addTemplatePoints message.
+	AddTemplateUserFields addUserFields   = 8;          // Optional addTemplateUserFields message.
 
     // ------------------------------------------------------------------------------------------------
     // Used to create a new Record in the gauge.
@@ -211,7 +223,7 @@ message Command
         uint32 numColsX                   = 6;          // Linear or Grid X Dimension 1..N.
         uint32 numRowsY                   = 7;          // Grid Y coordinate 1..N.
     }
-    
+	
     // ------------------------------------------------------------------------------------------------
     // Used to add blank points to a new record.
     // Send in blocks of 1..10 points.
@@ -233,6 +245,57 @@ message Command
             uint32 maxThickness          = 7;           // Maximum thickness warning (in UoM) or zero if not required.
         }
     }
+	
+	// ------------------------------------------------------------------------------------------------
+    // Used to create a new Template in the gauge.
+    message NewTemplate
+    {
+        string name                       = 1;          // template name or ID (30 chars max).
+        string key                        = 2;          // TML Key or ID, optional (30 chars max).
+		string xlFileName                 = 3;          // Excel filename, optional (30 chars max).
+		string xlSheetName                = 4;          // Excel Sheet name, optional (16 chars max).
+        UOM uom                           = 5;          // Units of Measurement.
+		uint32 velocity                   = 6;          // Velocity of sound in UOM or zero if not required.
+        uint32 numMPoints                 = 7;          // Number of measurement points 1..N
+		uint32 numMUserFields             = 8;          // Number of UserFields points 1..10
+    }
+    
+	// ------------------------------------------------------------------------------------------------
+    // Used to add blank points to a new Template.
+    // Send in blocks of 1..10 points.
+    // If more than 10 points are sent, the message will be discarded and a NAK response returned.
+    message AddTemplatePoints
+    {
+        string name                      = 1;           // template name or ID (30 chars max).
+        repeated MPoint mpoints          = 2;           // Array of 1..10 template measurement points per message.
+        
+        // ---------------------------------------------------------------
+        message MPoint
+        {
+			uint32 index                 = 1;           // point index, zero based.
+            string name                  = 2;           // point name (30 chars max).
+            uint32 key                   = 3;           // TML Key or ID number.
+            uint32 minThickness          = 4;           // Minimum thickness warning (in UoM) or zero if not required.
+            uint32 maxThickness          = 5;           // Maximum thickness warning (in UoM) or zero if not required.
+        }
+    }
+	
+	// ------------------------------------------------------------------------------------------------
+    // Used to add UserFields to a Template, a Template can contain 10 UserFields maximum.
+    // Send in one blocks of 1 to 10 fields.
+	// If more than 10 UserFields are sent, the message will be discarded and a NAK response returned.
+    message AddTemplateUserFields
+	{
+		string name                      = 1;           // template name or ID (30 chars max).
+        repeated UserField userfields    = 2;           // Array of 1..10 UserFields.
+		
+		message UserField
+		{
+			UserFieldType type           = 1;           // UserField type
+			string name                  = 2;           // UserField name (16 chars max).
+			repeated string List         = 3;           // Optional List of text items (each 16 chars max)
+		}
+	}
 }
 
 
@@ -265,7 +328,7 @@ message Message
     }
     
     // ------------------------------------------------------------------------------------------------
-    // Contains a list of Record found on the gauge.
+    // Contains a list of Records found on the gauge.
     message RecordList
     {
         repeated Item items              = 1;           // Array of 0..N record items.
@@ -300,6 +363,8 @@ message Message
         RecordType recordType                 = 8;
         uint32 numPointsRequired              = 9;
         uint32 numPointsTaken                 = 10;         // The number of RecordPoint messages to read.
+		uint32 numColums                      = 11;         // Number of columns when a Grid Record.
+		uint32 numRows                        = 12;         // Number of rows when a Grid Record.
     }
     
     // ------------------------------------------------------------------------------------------------
@@ -450,6 +515,10 @@ enum CommandType
     GetBScanPointAScan       = 14;    // requests a BScan's measurement point (With AScan data).
     DeleteBScan              = 15;    // requests a BScan is deleted from the gauge.
     DeleteAllBScans          = 16;    // requests all BScans are deleted from the gauge.
+	DeleteAllTemplates       = 17;    // requests all Templates are deleted from the gauge.
+	NewTemplate              = 18;    // sends a New Template to the Gauge.
+	AddTemplatePoints        = 19;    // sends a block of 1..10 Points and adds to the new Template on the Gauge.
+	AddTemplateUserFields    = 20;    // sends a block of 1..10 UserFields and adds to the new Template on the Gauge.
 }
 
 
@@ -516,8 +585,37 @@ enum Method
 
 enum ProbeType
 {
-    Single = 0;     // Single crystal probe, direct contact.
-    Dual   = 1;     // Dual crystal probe, with delay line.
+	//
+	// Generic Probe Type when exact type unknow.
+    //
+	Single      = 0;     // A Genereic Single crystal probe, direct contact.
+    Dual        = 1;     // A Generic Dual crystal probe, with delay line.
+	//
+	// Known Cygnus Probes.
+	//
+	S2C         = 2;
+    S2D         = 3;
+    S3C         = 4;
+    S5C         = 5;
+    S5A         = 6;
+    T2C         = 7;
+    T5B         = 8;
+    T7A         = 9;
+    T5BH        = 10;
+    D790        = 11;
+    TS2         = 12;
+    TS4         = 13;
+    T5A         = 14;
+    T2A         = 15;
+    T5B_CAWG2   = 16;
+    SD2C        = 17;
+    SD2C_CAWDG2 = 18;
+    HS380_25    = 19;
+    HSUHT_50    = 20;
+    HSUHT_75    = 21;
+    HS150DE     = 22;
+    S2C_CAWI    = 23;
+    S2C_CAWG2   = 24;
 }
 
 enum UOM
@@ -558,6 +656,17 @@ enum MeasurementPointState
     Deleted    = 2;     // The measurement has been deleted by the gauge user.
     Obstructed = 3;     // The measurement position could not be accessed.
     NoReading  = 4;     // No measurement could be obtained.
+}
+
+enum UserFieldType
+{
+    NotUsed    = 0;     // The UserField is not used.
+    Text       = 1;     // Text or String.
+    Number     = 2;     // Number.
+    DateDMY    = 3;     // Date in DD-MM-YYYY format.
+    DateMDY    = 4;     // Date in MM-DD-YYYY format.
+	List       = 5;     // A List of Items.
+	YesNo      = 6;     // Bool or Yes/No type.
 }
 
 // =====================================================================================================

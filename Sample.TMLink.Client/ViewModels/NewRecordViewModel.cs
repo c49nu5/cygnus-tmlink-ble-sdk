@@ -71,6 +71,10 @@ namespace Sample.TMLink.Client.ViewModels
         
         public uint RowCount { get; set; } = 5;
 
+        public uint ThicknessMinLimit { get; set; }
+
+        public uint ThicknessRefLimit { get; set; }
+
         private void GenerateLinearMeasurements()
         {
             for (uint i = 0; i < ColumnCount; i++)
@@ -81,7 +85,7 @@ namespace Sample.TMLink.Client.ViewModels
                     Name = $"P{i + 1}",
                     Method = Method.Spot,
                     ThicknessMinLimit = 4000,
-                    ThicknessMaxLimit = 24000,
+                    ThicknessRefLimit = 24000,
                 });
             }
 
@@ -102,7 +106,7 @@ namespace Sample.TMLink.Client.ViewModels
                         RowNumY = r,
                         Method = Method.Spot,
                         ThicknessMinLimit = 5000,
-                        ThicknessMaxLimit = 25000,
+                        ThicknessRefLimit = 25000,
                     });
                 }
             }

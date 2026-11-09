@@ -55,6 +55,7 @@
                         <VerticalStackLayout  VerticalOptions="Center">
                             <HorizontalStackLayout Spacing="10">
                                 <Label Text="{Binding Name}" WidthRequest="140"/>
+                                <Label Text="{Binding GaugeType}" WidthRequest="80"/>
                                 <Label Text="{Binding Model}" WidthRequest="80"/>
                                 <Label Text="{Binding SerialNumber}" WidthRequest="70"/>
                             </HorizontalStackLayout>

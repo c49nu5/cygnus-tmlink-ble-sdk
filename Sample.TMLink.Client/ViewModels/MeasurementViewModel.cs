@@ -8,6 +8,10 @@ namespace Sample.TMLink.Client.ViewModels
         public string? Thickness { get; internal set; }
         public string? Velocity { get; internal set; }
         public DateTimeOffset? Timestamp { get; internal set; }
+        public int? AScanWidth { get; internal set; }
+        public string? Comments { get; internal set; }
+        public string ThicknessMinLimit { get; internal set; } = string.Empty;
+        public string ThicknessRefLimit { get; internal set; } = string.Empty;
     }
 }
 

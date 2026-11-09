@@ -69,7 +69,7 @@ namespace Sample.TMLink.Client.ViewModels
                                 RowNumY = point.RowNumY,
                                 Method = point.Method,
                                 ThicknessMinLimit = point.ThicknessMinLimit,
-                                ThicknessMaxLimit = point.ThicknessMaxLimit
+                                ThicknessRefLimit = point.ThicknessRefLimit
                             }).ToArray()
                     };
 
@@ -104,6 +104,7 @@ namespace Sample.TMLink.Client.ViewModels
                         Model = value.Model;
                         SerialNumber = value.SerialNumber;
                         FirmwareVersion = value.FirmwareVersion;
+                        GaugeType = value.GaugeType;
                         value.AddObserver(this);
                     }
                 }
@@ -118,6 +119,9 @@ namespace Sample.TMLink.Client.ViewModels
 
         [ObservableProperty]
         public partial string Name { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial GaugeType GaugeType { get; set; }
         
         [ObservableProperty]
         public partial string Model { get; set; } = string.Empty;
@@ -166,7 +170,11 @@ namespace Sample.TMLink.Client.ViewModels
                                 Name = measurement.Name,
                                 Thickness = _measurementConverter.GetDisplayedThickness(measurement.Thickness ?? 0, measurement.Units),
                                 Velocity = _measurementConverter.GetDisplayedVelocity(measurement.Velocity, measurement.Units),
-                                Timestamp = measurement.Time
+                                Timestamp = measurement.Time,
+                                Comments = measurement.Comments,
+                                ThicknessMinLimit = _measurementConverter.GetDisplayedThickness(measurement.ThicknessMinLimit, measurement.Units),
+                                ThicknessRefLimit = _measurementConverter.GetDisplayedThickness(measurement.ThicknessRefLimit, measurement.Units),
+                                AScanWidth = measurement.HasAScan && measurement.AScan.Amplitudes != null ? measurement.AScan.Amplitudes.Length : 0,
                             });
                         }
                     }

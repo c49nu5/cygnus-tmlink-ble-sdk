@@ -10,6 +10,6 @@ namespace Sample.TMLink.Client.ViewModels
         public uint RowNumY { get; set; }
         public Method Method { get; set; } = Method.Spot;
         public uint ThicknessMinLimit { get; set; }
-        public uint ThicknessMaxLimit { get; set; }
+        public uint ThicknessRefLimit { get; set; }
     }
 }

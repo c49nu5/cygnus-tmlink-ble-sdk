@@ -14,6 +14,8 @@ public class TMLinkPlatformService : IPlatformService, IUserDialogService
         _logger = logger;
     }
 
+    public bool SupportsWiderAScans => DeviceInfo.Current.Platform == DevicePlatform.WinUI;
+
     public virtual async Task<bool> CheckBluetoothConfiguration()
     {
         if (!await Bluetooth.GetAvailabilityAsync())

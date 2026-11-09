@@ -9,7 +9,7 @@
                Padding="0">
     <Grid
         Margin="20"
-        RowDefinitions="Auto,Auto,Auto,Auto">
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
         <HorizontalStackLayout>
             <Label
                 Margin="10"
@@ -28,8 +28,24 @@
                 Text="{Binding Name}"/>
         </HorizontalStackLayout>
         <HorizontalStackLayout
-            IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Grid}"
             Grid.Row="2">
+            <Label
+                Margin="10"
+                Text="Minimum Thickness Limit"/>
+            <Entry
+                Text="{Binding ThicknessMinLimit, Mode=TwoWay}"/>
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            Grid.Row="3">
+            <Label
+                Margin="10"
+                Text="Ref Thickness Limit"/>
+            <Entry
+                Text="{Binding ThicknessRefLimit, Mode=TwoWay}"/>
+        </HorizontalStackLayout>
+        <HorizontalStackLayout
+            IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Grid}"
+            Grid.Row="4">
             <Label
                 Margin="10"
                 Text="Rows"/>
@@ -43,7 +59,7 @@
         </HorizontalStackLayout>
         <HorizontalStackLayout
             IsVisible="{Binding SelectedType, Converter={toolkit:IsEqualConverter}, ConverterParameter=Linear}"
-            Grid.Row="2">
+            Grid.Row="4">
             <Label
                 Margin="10"
                 Text="Measurement Count"/>
@@ -51,16 +67,16 @@
                 Text="{Binding ColumnCount, Mode=TwoWay}"/>
         </HorizontalStackLayout>
         <HorizontalStackLayout
-            Grid.Row="3"
-                HorizontalOptions="End">
+            Grid.Row="5"
+            HorizontalOptions="End">
             <Button
-                    Margin="10"
-                    Text="OK"
-                    Command="{Binding OKCommand}"/>
+                Margin="10"
+                Text="OK"
+                Command="{Binding OKCommand}"/>
             <Button
-                    Margin="10"
-                    Text="Cancel"
-                    Command="{Binding CancelCommand}"/>
+                Margin="10"
+                Text="Cancel"
+                Command="{Binding CancelCommand}"/>
         </HorizontalStackLayout>
     </Grid>
 </toolkit:Popup>

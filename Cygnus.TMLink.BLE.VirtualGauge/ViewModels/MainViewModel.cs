@@ -7,6 +7,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Text;
 using static Cygnus.TMLink.Interfaces.Constants;
+using Cygnus.Models;
 
 namespace Cygnus.TMLink.BLE.VirtualGauge.ViewModels;
 
@@ -28,32 +29,60 @@ public partial class MainViewModel : ObservableObject
     {
         _hostingManager = hostingManager;
         _protobufMessageConverter = protobufMessageConverter;
+        GaugeType = GaugeTypes.First();
     }
 
     [ObservableProperty]
-    public partial string LocalName { get; set; } = "Virtual Cygnus 1Ex";
+    public partial string LocalName { get; set; } = "Virtual Gauge";
+
+    [ObservableProperty]
+    public partial GaugeType GaugeType { get; set; }
+
+    public IEnumerable<GaugeType> GaugeTypes { get; } =
+    [
+        GaugeType.M5EX,
+        GaugeType.M6SG,
+    ];
+
     [ObservableProperty]
     public partial string LastWriteValue { get; set; } = string.Empty;
+
     [ObservableProperty]
     public partial string LastWriteTime { get; set; } = string.Empty;
+
     [ObservableProperty]
     public partial string LastReadValue { get; set; } = string.Empty;
+
     [ObservableProperty]
     public partial string LastReadTime { get; set; } = string.Empty;
+
     [ObservableProperty]
     public partial int Subscribers { get; set; }
+
     [ObservableProperty]
     public partial string SubscribersLastValue { get; set; } = string.Empty;
+
     [ObservableProperty]
     public partial int LiveSubscribers { get; set; }
+
     [ObservableProperty]
     public partial string LiveThickness { get; set; } = "3234";
+
     [ObservableProperty]
     public partial string LastLiveNotificationTime { get; set; } = string.Empty;
+
     [ObservableProperty]
     public partial string LastFrozenReadTime { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsLiveMeasurementValid { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool IsLiveMeasurementStable { get; set; } = true;
+
     [ObservableProperty]
     public partial bool IsLiveMeasurementFrozen { get; set; }
+
     [ObservableProperty]
     public partial bool IsAdvertising { get; set; }
 
@@ -136,6 +165,7 @@ public partial class MainViewModel : ObservableObject
                         case Protobuf.V1.CommandType.GetGaugeInfo:
                             {
                                 message.gaugeInfo = _gaugeData.GaugeInfo;
+                                message.gaugeInfo.gaugeType = (Protobuf.V1.GaugeType)GaugeType;
                                 LastReadValue = $"Gauge info {message.gaugeInfo?.serialNumber}";
                                 break;
                             }
@@ -182,8 +212,8 @@ public partial class MainViewModel : ObservableObject
                             }
                             case Protobuf.V1.CommandType.AddRecordPoints:
                             {
-                                _gaugeData.AddRecordPoints(command.addRecordPoints);
-                                LastWriteValue = $"Added {command.addRecordPoints.Mpoints.Count} points to record {command.addRecordPoints.Name}";
+                                _gaugeData.AddRecordPoints(command.addPoints);
+                                LastWriteValue = $"Added {command.addPoints.Mpoints.Count} points to record {command.addPoints.Name}";
                                 message = null;
                                 break;
                             }
@@ -251,9 +281,9 @@ public partial class MainViewModel : ObservableObject
                         .Interval(TimeSpan.FromMilliseconds(150), Scheduler.Default)
                         .Select(_ => Observable.FromAsync<DateTime?>(async () =>
                         {
-                            if (!IsLiveMeasurementFrozen)
+                            if (IsLiveMeasurementValid && !IsLiveMeasurementFrozen)
                             {
-                                Protobuf.V1.NotifyLiveMeasurement measurement = _gaugeData.CreateLiveMeasurement(Protobuf.V1.LiveMeasurementType.Live, LiveThickness);
+                                Protobuf.V1.NotifyLiveMeasurement measurement = _gaugeData.CreateLiveMeasurement(Protobuf.V1.LiveMeasurementType.Live, LiveThickness, IsLiveMeasurementStable);
                                 await notifier.Notify(_protobufMessageConverter.ToProtobuf(measurement), notifier.SubscribedCentrals.ToArray());
                                 return DateTime.Now;
                             }
@@ -283,7 +313,7 @@ public partial class MainViewModel : ObservableObject
                 cb.SetRead(request =>
                 {
                     LastFrozenReadTime = DateTime.Now.ToString();
-                    Protobuf.V1.FrozenLiveMeasurement measurement = _gaugeData.CreateFrozenLiveMeasurement(LiveThickness);
+                    Protobuf.V1.FrozenLiveMeasurement measurement = _gaugeData.CreateFrozenLiveMeasurement(LiveThickness, IsLiveMeasurementStable);
                     return Task.FromResult(GattResult.Success(_protobufMessageConverter.ToZippedProtobuf(measurement)));
                 });
             }
@@ -298,8 +328,9 @@ public partial class MainViewModel : ObservableObject
             {
                 cb.SetRead(request =>
                 {
-                    byte[] deviceModel = Encoding.UTF8.GetBytes("C1Ex Virtual");
-                    return Task.FromResult(GattResult.Success(deviceModel));
+                    string modelString = $"{(GaugeType == GaugeType.M5EX ? "C1Ex" : "SG")} Virtual";
+                    byte[] modelBytes = Encoding.UTF8.GetBytes(modelString);
+                    return Task.FromResult(GattResult.Success(modelBytes));
                 });
             }
         );
@@ -322,7 +353,7 @@ public partial class MainViewModel : ObservableObject
             {
                 cb.SetRead(request =>
                 {
-                    byte[] firmwareRevision = Encoding.UTF8.GetBytes("1.4.11");
+                    byte[] firmwareRevision = Encoding.UTF8.GetBytes("1.4.16");
                     return Task.FromResult(GattResult.Success(firmwareRevision));
                 });
             }
@@ -417,7 +448,7 @@ public partial class MainViewModel : ObservableObject
                 var notifyLiveCharacteristic = _notifyLiveCharacteristic;
                 if (notifyLiveCharacteristic != null)
                 {
-                    Protobuf.V1.NotifyLiveMeasurement measurement = _gaugeData.CreateLiveMeasurement(Protobuf.V1.LiveMeasurementType.Frozen, LiveThickness);
+                    Protobuf.V1.NotifyLiveMeasurement measurement = _gaugeData.CreateLiveMeasurement(Protobuf.V1.LiveMeasurementType.Frozen, LiveThickness, IsLiveMeasurementStable);
                     await notifyLiveCharacteristic.Notify(_protobufMessageConverter.ToProtobuf(measurement), notifyLiveCharacteristic.SubscribedCentrals.ToArray());
                 }
             });

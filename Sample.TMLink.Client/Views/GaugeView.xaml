@@ -87,7 +87,11 @@
                         <Label Text="{Binding Name}" WidthRequest="80"/>
                         <Label Text="{Binding Thickness}" WidthRequest="80" HorizontalTextAlignment="End"/>
                         <Label Text="{Binding Velocity}" WidthRequest="80" HorizontalTextAlignment="End"/>
+                        <Label Text="{Binding ThicknessMinLimit}" WidthRequest="80" HorizontalTextAlignment="End"/>
+                        <Label Text="{Binding ThicknessRefLimit}" WidthRequest="80" HorizontalTextAlignment="End"/>
                         <Label Text="{Binding Timestamp}"/>
+                        <Label Text="{Binding AScanWidth}"/>
+                        <Label Text="{Binding Comments}"/>
                     </HorizontalStackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
